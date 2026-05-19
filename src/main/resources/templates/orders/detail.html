@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADAREDI.COM — Order detail</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script>
+        (function () {
+            try {
+                const stored = localStorage.getItem('bedsheet-theme');
+                const theme = stored === 'dark' || stored === 'light'
+                    ? stored
+                    : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                document.documentElement.dataset.theme = theme;
+                document.documentElement.style.colorScheme = theme;
+            } catch (e) {
+                document.documentElement.style.colorScheme = 'light';
+            }
+        })();
+    </script>
+</head>
+<body>
+<div th:replace="~{fragments/nav :: main}"></div>
+
+<main class="container page-shell">
+    <p class="success" th:if="${successMessage}" th:text="${successMessage}"></p>
+    <p class="error" th:if="${errorMessage}" th:text="${errorMessage}"></p>
+
+    <section class="card" th:object="${order}">
+        <h2 th:text="'Order — Waybill ' + *{waybillNo}">Order</h2>
+
+        <div class="grid two-col meta">
+            <p><strong>Name:</strong> <span th:text="*{customerName}"></span></p>
+            <p><strong>Primary phone:</strong> <span th:text="*{primaryPhone}"></span></p>
+            <p><strong>Secondary phone:</strong> <span th:text="*{secondaryPhone} ?: '—'"></span></p>
+            <p><strong>Address:</strong> <span th:text="*{address}"></span></p>
+            <p><strong>Nearest city:</strong> <span th:text="*{nearestCity}"></span></p>
+            <p><strong>District / state:</strong> <span th:text="*{district}"></span></p>
+            <p><strong>Weight:</strong> <span th:text="*{weight} ?: '—'"></span></p>
+            <p><strong>Delivery charge:</strong> LKR <span th:text="*{deliveryCharge}"></span></p>
+            <p><strong>COD value:</strong> LKR <span th:text="*{codValue}"></span></p>
+            <p><strong>Discount:</strong> LKR <span th:text="*{discount}"></span></p>
+        </div>
+
+        <div th:if="${curfoxEnabled}" class="card subtle curfox-panel">
+            <h3>Royal Express (Curfox)</h3>
+            <p>
+                <span class="badge" th:classappend="' badge-' + *{curfoxSyncStatus.name()}"
+                      th:text="*{curfoxSyncStatus}">NOT_SYNCED</span>
+                <span th:if="*{curfoxLastStatus}" th:text="'Latest: ' + *{curfoxLastStatus}"></span>
+            </p>
+            <p th:if="*{curfoxSyncMessage}" class="hint" th:text="*{curfoxSyncMessage}"></p>
+            <p th:if="*{curfoxSyncedAt}" class="hint"
+               th:text="'Last sync: ' + ${#temporals.format(order.curfoxSyncedAt, 'yyyy-MM-dd HH:mm')}"></p>
+            <div class="row wrap">
+                <form th:action="@{/orders/{id}/curfox/sync(id=${order.id})}" method="post">
+                    <button type="submit" class="btn secondary">Push / re-sync to Royal Express</button>
+                </form>
+                <form th:action="@{/orders/{id}/curfox/tracking(id=${order.id})}" method="post">
+                    <button type="submit" class="btn subtle">Refresh tracking</button>
+                </form>
+            </div>
+        </div>
+
+        <div th:if="${tracking != null}" class="card subtle">
+            <h3>Tracking timeline</h3>
+            <p th:if="${#lists.isEmpty(tracking)}" class="hint">No tracking events yet.</p>
+            <ul class="tracking-list" th:if="${!#lists.isEmpty(tracking)}">
+                <li th:each="t : ${tracking}">
+                    <strong th:text="${t.statusName}">STATUS</strong>
+                    <span th:text="${t.dateTimeAgo}"></span>
+                    <span th:if="${t.userName}" th:text="' — ' + ${t.userName}"></span>
+                </li>
+            </ul>
+        </div>
+
+        <h3>Products</h3>
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>Type</th>
+                <th>Size</th>
+                <th>Design</th>
+                <th>Qty</th>
+                <th>Pillow cases</th>
+                <th>Unit sell</th>
+                <th>Unit profit</th>
+                <th>Line sell</th>
+                <th>Line profit</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item : *{items}">
+                <td th:text="${item.bedsheetType}"></td>
+                <td th:text="${#strings.replace(item.bedSize.name(), '_', ' ')}"></td>
+                <td th:text="${item.beddingDesign}"></td>
+                <td th:text="${item.quantity}"></td>
+                <td th:text="${item.pillowcaseQuantity}"></td>
+                <td th:text="${item.unitSellingPrice}"></td>
+                <td th:text="${item.unitProfit}"></td>
+                <td th:text="${item.lineSellingPrice}"></td>
+                <td th:text="${item.lineProfit}"></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="summary card subtle">
+            <p>Total selling: <strong th:text="'LKR ' + *{totalSellingPrice}"></strong></p>
+            <p>Gross profit: <strong th:text="'LKR ' + *{grossProfit}"></strong></p>
+            <p>Net profit (after discount): <strong th:text="'LKR ' + *{netProfit}"></strong></p>
+        </div>
+    </section>
+</main>
+<script th:src="@{/js/theme.js}"></script>
+</body>
+</html>

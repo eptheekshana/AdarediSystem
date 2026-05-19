@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<header class="topbar" th:fragment="main">
+    <div class="brand">
+        <h1>ADAREDI.COM</h1>
+        <span class="brand-tagline">Orders &amp; Profit</span>
+    </div>
+    <nav class="nav-actions">
+        <a th:href="@{/dashboard}">Dashboard</a>
+        <a th:href="@{/orders/new}">New order</a>
+        <a th:href="@{/orders}">All orders</a>
+        <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false" aria-label="Toggle dark mode">
+            <span class="theme-toggle-icon">☾</span>
+            <span class="theme-toggle-label">Dark mode</span>
+        </button>
+    </nav>
+</header>
+</body>
+</html>

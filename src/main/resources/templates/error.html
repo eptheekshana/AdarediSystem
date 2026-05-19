@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ADAREDI.COM — Error</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script>
+        (function () {
+            try {
+                const stored = localStorage.getItem('bedsheet-theme');
+                const theme = stored === 'dark' || stored === 'light'
+                    ? stored
+                    : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                document.documentElement.dataset.theme = theme;
+                document.documentElement.style.colorScheme = theme;
+            } catch (e) {
+                document.documentElement.style.colorScheme = 'light';
+            }
+        })();
+    </script>
+</head>
+<body>
+<div th:replace="~{fragments/nav :: main}"></div>
+<main class="container page-shell">
+    <section class="card">
+        <h2>Something went wrong</h2>
+        <p th:if="${status}" th:text="'Status: ' + ${status}"></p>
+        <p th:if="${message}" th:text="${message}"></p>
+        <p th:unless="${message}">The page could not be loaded.</p>
+        <p>
+            <a th:href="@{/dashboard}">Dashboard</a> ·
+            <a th:href="@{/orders/new}">New order</a> ·
+            <a th:href="@{/orders}">All orders</a>
+        </p>
+    </section>
+</main>
+<script th:src="@{/js/theme.js}"></script>
+</body>
+</html>
