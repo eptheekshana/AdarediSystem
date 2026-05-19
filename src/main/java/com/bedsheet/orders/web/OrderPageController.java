@@ -164,6 +164,7 @@ public class OrderPageController {
     private static OrderRequest sampleOrder() {
         OrderRequest order = new OrderRequest();
         order.setPushToCurfox(true);
+        order.setCreatedAt(java.time.LocalDateTime.now());
         OrderItemRequest item = new OrderItemRequest();
         item.setBedsheetType(BedsheetType.FLAT);
         item.setBedSize(BedSize.DOUBLE);

@@ -90,6 +90,9 @@ public class OrderService {
         order.setNearestCity(request.getNearestCity().trim());
         order.setDistrict(request.getDistrict().trim());
         order.setWeight(request.getWeight());
+        if (request.getCreatedAt() != null) {
+            order.setCreatedAt(request.getCreatedAt());
+        }
         order.setDeliveryCharge(zeroIfNull(request.getDeliveryCharge()));
         order.setCodValue(zeroIfNull(request.getCodValue()));
         order.setDiscount(zeroIfNull(request.getDiscount()));

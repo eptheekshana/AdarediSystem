@@ -40,6 +40,10 @@
                         <input type="text" th:field="*{waybillNo}" required>
                         <span class="error" th:if="${#fields.hasErrors('waybillNo')}" th:errors="*{waybillNo}"></span>
                     </label>
+                    <label>Order date
+                        <input type="datetime-local" th:field="*{createdAt}">
+                        <span class="hint">Set the order date/time (defaults to now if empty).</span>
+                    </label>
                     <label>Name *
                         <input type="text" th:field="*{customerName}" required>
                     </label>

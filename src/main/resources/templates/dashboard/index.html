@@ -19,7 +19,6 @@
             }
         })();
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
 <div th:replace="~{fragments/nav :: main}"></div>
@@ -31,6 +30,7 @@
                 <h2>ADAREDI.COM analytics</h2>
                 <p class="hint" th:if="${periodDays > 0}" th:text="'Showing last ' + ${periodDays} + ' days'">Period</p>
                 <p class="hint" th:if="${periodDays == 0}">Showing all time</p>
+                <p class="hint">Revenue = COD value − delivery charge. Net profit stays separate.</p>
             </div>
             <div class="period-filters">
                 <a th:href="@{/dashboard(days=7)}" th:classappend="${periodDays == 7} ? 'active' : ''">7 days</a>
@@ -41,36 +41,6 @@
         </div>
     </section>
 
-     <section class="card">
-         <h3>Daily analysis</h3>
-         <p class="hint">Showing detailed per-day metrics including orders, items sold, revenue, and profit analysis.</p>
-         <table class="data-table">
-             <thead>
-             <tr>
-                 <th>Date</th>
-                 <th>Orders</th>
-                 <th>Qty sold</th>
-                 <th>Avg order (LKR)</th>
-                 <th>Revenue (LKR)</th>
-                 <th>Net profit (LKR)</th>
-                 <th>Avg profit/order (LKR)</th>
-                 <th>Profit %</th>
-             </tr>
-             </thead>
-             <tbody>
-             <tr th:each="d : ${dashboard.dailyTrend}">
-                 <td th:text="${#temporals.format(d.date, 'yyyy-MM-dd')}">2023-01-01</td>
-                 <td th:text="${d.orderCount}">0</td>
-                 <td th:text="${d.itemsSold}">0</td>
-                 <td th:text="${#numbers.formatDecimal(d.avgOrderValue, 0, 'COMMA', 0, 'POINT')}">0</td>
-                 <td th:text="${#numbers.formatDecimal(d.revenue, 0, 'COMMA', 0, 'POINT')}">0</td>
-                 <td th:text="${#numbers.formatDecimal(d.netProfit, 0, 'COMMA', 0, 'POINT')}">0</td>
-                 <td th:text="${#numbers.formatDecimal(d.avgProfitPerOrder, 0, 'COMMA', 0, 'POINT')}">0</td>
-                 <td th:text="${#numbers.formatDecimal(d.profitMarginPercent, 1, 'COMMA', 2, 'POINT')}">0%</td>
-             </tr>
-             </tbody>
-         </table>
-     </section>
     <section class="kpi-grid" th:object="${dashboard}">
         <article class="kpi card">
             <span class="kpi-label">Orders</span>
@@ -93,55 +63,91 @@
             <strong class="kpi-value" th:text="${#numbers.formatDecimal(dashboard.grossProfit, 0, 'COMMA', 0, 'POINT')}">0</strong>
         </article>
         <article class="kpi card">
-            <span class="kpi-label">Discounts (LKR)</span>
-            <strong class="kpi-value" th:text="${#numbers.formatDecimal(dashboard.totalDiscount, 0, 'COMMA', 0, 'POINT')}">0</strong>
+            <span class="kpi-label">COD total (LKR)</span>
+            <strong class="kpi-value" th:text="${#numbers.formatDecimal(dashboard.totalCod, 0, 'COMMA', 0, 'POINT')}">0</strong>
+        </article>
+        <article class="kpi card">
+            <span class="kpi-label">Delivery charges (LKR)</span>
+            <strong class="kpi-value" th:text="${#numbers.formatDecimal(dashboard.totalDeliveryCharge, 0, 'COMMA', 0, 'POINT')}">0</strong>
         </article>
         <article class="kpi card">
             <span class="kpi-label">Avg order (LKR)</span>
             <strong class="kpi-value" th:text="${#numbers.formatDecimal(dashboard.avgOrderValue, 0, 'COMMA', 0, 'POINT')}">0</strong>
         </article>
         <article class="kpi card">
-            <span class="kpi-label">Avg profit / order</span>
+            <span class="kpi-label">Avg profit / order (LKR)</span>
             <strong class="kpi-value" th:text="${#numbers.formatDecimal(dashboard.avgNetProfit, 0, 'COMMA', 0, 'POINT')}">0</strong>
         </article>
     </section>
 
-    <section class="chart-grid">
-        <article class="card chart-card">
-            <h3>Revenue &amp; profit trend</h3>
-            <canvas id="trendChart"></canvas>
+    <section class="insight-grid">
+        <article class="card insight-card">
+            <span class="kpi-label">Top district</span>
+            <strong class="insight-value" th:text="${#lists.isEmpty(dashboard.byDistrict) ? '—' : dashboard.byDistrict[0].label}">—</strong>
+            <p class="hint" th:if="${!#lists.isEmpty(dashboard.byDistrict)}"
+               th:text="'Profit: LKR ' + ${#numbers.formatDecimal(dashboard.byDistrict[0].profit, 0, 'COMMA', 0, 'POINT')}">Profit</p>
         </article>
-        <article class="card chart-card">
-            <h3>Daily quantity sold</h3>
-            <canvas id="quantityChart"></canvas>
+        <article class="card insight-card">
+            <span class="kpi-label">Top city</span>
+            <strong class="insight-value" th:text="${#lists.isEmpty(dashboard.byCity) ? '—' : dashboard.byCity[0].label}">—</strong>
+            <p class="hint" th:if="${!#lists.isEmpty(dashboard.byCity)}"
+               th:text="'Profit: LKR ' + ${#numbers.formatDecimal(dashboard.byCity[0].profit, 0, 'COMMA', 0, 'POINT')}">Profit</p>
         </article>
-        <article class="card chart-card">
-            <h3>Profit by district</h3>
-            <canvas id="districtChart"></canvas>
+        <article class="card insight-card">
+            <span class="kpi-label">Best product type</span>
+            <strong class="insight-value" th:text="${#lists.isEmpty(dashboard.byBedsheetType) ? '—' : dashboard.byBedsheetType[0].type}">—</strong>
+            <p class="hint" th:if="${!#lists.isEmpty(dashboard.byBedsheetType)}"
+               th:text="'Qty: ' + ${dashboard.byBedsheetType[0].quantity} + ' • Profit: LKR ' + ${#numbers.formatDecimal(dashboard.byBedsheetType[0].profit, 0, 'COMMA', 0, 'POINT')}">Qty</p>
         </article>
-        <article class="card chart-card">
-            <h3>Flat vs fitted (qty)</h3>
-            <canvas id="typeChart"></canvas>
+        <article class="card insight-card">
+            <span class="kpi-label">Top bed size</span>
+            <strong class="insight-value" th:text="${#lists.isEmpty(dashboard.byBedSize) ? '—' : dashboard.byBedSize[0].label}">—</strong>
+            <p class="hint" th:if="${!#lists.isEmpty(dashboard.byBedSize)}"
+               th:text="'Units: ' + ${dashboard.byBedSize[0].count} + ' • Profit: LKR ' + ${#numbers.formatDecimal(dashboard.byBedSize[0].profit, 0, 'COMMA', 0, 'POINT')}">Units</p>
         </article>
-         <article class="card chart-card">
-             <h3>Units by bed size</h3>
-             <canvas id="sizeChart"></canvas>
-         </article>
-         <article class="card chart-card">
-             <h3>Daily avg order value</h3>
-             <canvas id="avgOrderChart"></canvas>
-         </article>
-         <article class="card chart-card">
-             <h3>Daily profit margin %</h3>
-             <canvas id="profitMarginChart"></canvas>
-         </article>
-     </section>
+    </section>
 
     <section class="dashboard-tables">
         <article class="card">
+            <div class="section-head">
+                <div>
+                    <h3>Daily analysis</h3>
+                    <p class="hint">Per-day performance with orders, items sold, revenue, and profitability.</p>
+                </div>
+            </div>
+            <div class="table-wrap">
+                <table class="data-table compact-table">
+                    <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Orders</th>
+                        <th>Qty sold</th>
+                        <th>Revenue (LKR)</th>
+                        <th>Net profit (LKR)</th>
+                        <th>Avg order (LKR)</th>
+                        <th>Profit %</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="d : ${dashboard.dailyTrend}">
+                        <td th:text="${#temporals.format(d.date, 'yyyy-MM-dd')}">2023-01-01</td>
+                        <td th:text="${d.orderCount}">0</td>
+                        <td th:text="${d.itemsSold}">0</td>
+                        <td th:text="${#numbers.formatDecimal(d.revenue, 0, 'COMMA', 0, 'POINT')}">0</td>
+                        <td th:text="${#numbers.formatDecimal(d.netProfit, 0, 'COMMA', 0, 'POINT')}">0</td>
+                        <td th:text="${#numbers.formatDecimal(d.avgOrderValue, 0, 'COMMA', 0, 'POINT')}">0</td>
+                        <td th:text="${#numbers.formatDecimal(d.profitMarginPercent, 1, 'COMMA', 2, 'POINT')}">0%</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </article>
+
+        <article class="card">
             <h3>Recent orders</h3>
             <p class="hint" th:if="${#lists.isEmpty(dashboard.recentOrders)}">No orders in this period.</p>
-            <table th:if="${!#lists.isEmpty(dashboard.recentOrders)}" class="data-table">
+            <div class="table-wrap" th:if="${!#lists.isEmpty(dashboard.recentOrders)}">
+            <table class="data-table compact-table">
                 <thead>
                 <tr>
                     <th>Date</th>
@@ -165,31 +171,111 @@
                 </tr>
                 </tbody>
             </table>
+            </div>
+        </article>
+    </section>
+
+    <section class="analytics-panels">
+        <article class="card">
+            <h3>Top districts by profit</h3>
+            <p class="hint" th:if="${#lists.isEmpty(dashboard.byDistrict)}">No data yet.</p>
+            <div class="table-wrap" th:if="${!#lists.isEmpty(dashboard.byDistrict)}">
+                <table class="data-table compact-table">
+                    <thead>
+                    <tr>
+                        <th>District</th>
+                        <th>Orders</th>
+                        <th>Revenue</th>
+                        <th>Profit</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="d : ${dashboard.byDistrict}">
+                        <td th:text="${d.label}"></td>
+                        <td th:text="${d.count}"></td>
+                        <td th:text="${#numbers.formatDecimal(d.revenue, 0, 'COMMA', 0, 'POINT')}"></td>
+                        <td th:text="${#numbers.formatDecimal(d.profit, 0, 'COMMA', 0, 'POINT')}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </article>
 
         <article class="card">
             <h3>Top cities by profit</h3>
-            <table class="data-table" th:if="${!#lists.isEmpty(dashboard.byCity)}">
-                <thead>
-                <tr><th>City</th><th>Orders</th><th>Profit (LKR)</th></tr>
-                </thead>
-                <tbody>
-                <tr th:each="c : ${dashboard.byCity}">
-                    <td th:text="${c.label}"></td>
-                    <td th:text="${c.count}"></td>
-                    <td th:text="${#numbers.formatDecimal(c.profit, 0, 'COMMA', 0, 'POINT')}"></td>
-                </tr>
-                </tbody>
-            </table>
             <p class="hint" th:if="${#lists.isEmpty(dashboard.byCity)}">No data yet.</p>
+            <div class="table-wrap" th:if="${!#lists.isEmpty(dashboard.byCity)}">
+                <table class="data-table compact-table">
+                    <thead>
+                    <tr>
+                        <th>City</th>
+                        <th>Orders</th>
+                        <th>Revenue</th>
+                        <th>Profit</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="c : ${dashboard.byCity}">
+                        <td th:text="${c.label}"></td>
+                        <td th:text="${c.count}"></td>
+                        <td th:text="${#numbers.formatDecimal(c.revenue, 0, 'COMMA', 0, 'POINT')}"></td>
+                        <td th:text="${#numbers.formatDecimal(c.profit, 0, 'COMMA', 0, 'POINT')}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </article>
+
+        <article class="card">
+            <h3>Product mix</h3>
+            <p class="hint" th:if="${#lists.isEmpty(dashboard.byBedsheetType)}">No data yet.</p>
+            <div class="table-wrap" th:if="${!#lists.isEmpty(dashboard.byBedsheetType)}">
+                <table class="data-table compact-table">
+                    <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Qty</th>
+                        <th>Profit</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="t : ${dashboard.byBedsheetType}">
+                        <td th:text="${t.type}"></td>
+                        <td th:text="${t.quantity}"></td>
+                        <td th:text="${#numbers.formatDecimal(t.profit, 0, 'COMMA', 0, 'POINT')}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </article>
+
+        <article class="card">
+            <h3>Units by bed size</h3>
+            <p class="hint" th:if="${#lists.isEmpty(dashboard.byBedSize)}">No data yet.</p>
+            <div class="table-wrap" th:if="${!#lists.isEmpty(dashboard.byBedSize)}">
+                <table class="data-table compact-table">
+                    <thead>
+                    <tr>
+                        <th>Size</th>
+                        <th>Units</th>
+                        <th>Revenue</th>
+                        <th>Profit</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="s : ${dashboard.byBedSize}">
+                        <td th:text="${s.label}"></td>
+                        <td th:text="${s.count}"></td>
+                        <td th:text="${#numbers.formatDecimal(s.revenue, 0, 'COMMA', 0, 'POINT')}"></td>
+                        <td th:text="${#numbers.formatDecimal(s.profit, 0, 'COMMA', 0, 'POINT')}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </article>
     </section>
 </main>
 
 <script th:src="@{/js/theme.js}"></script>
-<script th:inline="javascript">
-    const DASHBOARD_DATA = [(${chartDataJson})];
-</script>
-<script th:src="@{/js/dashboard.js}"></script>
 </body>
 </html>

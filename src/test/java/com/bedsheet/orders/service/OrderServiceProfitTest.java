@@ -24,11 +24,21 @@ class OrderServiceProfitTest {
     @Mock
     private OrderRepository orderRepository;
 
+    @Mock
+    private com.bedsheet.orders.curfox.CurfoxOrderSyncService curfoxOrderSyncService;
+
+    @Mock
+    private com.bedsheet.orders.curfox.CurfoxProperties curfoxProperties;
+
     private OrderService orderService;
 
     @BeforeEach
     void setUp() {
-        orderService = new OrderService(orderRepository, new PricingService());
+        // ensure curfox integration flags are mocked to avoid NPEs during tests
+        when(curfoxProperties.isAutoSyncOnCreate()).thenReturn(false);
+        when(curfoxOrderSyncService.isIntegrationAvailable()).thenReturn(false);
+
+        orderService = new OrderService(orderRepository, new PricingService(), curfoxOrderSyncService, curfoxProperties);
     }
 
     @Test

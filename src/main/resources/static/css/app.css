@@ -299,8 +299,9 @@ legend {
 @media (max-width: 760px) {
     .two-col,
     .three-col,
-    .chart-grid,
-    .dashboard-tables {
+    .dashboard-tables,
+    .insight-grid,
+    .analytics-panels {
         grid-template-columns: 1fr;
     }
 }
@@ -550,25 +551,64 @@ select:focus {
     border-left: 4px solid var(--accent);
 }
 
-.chart-grid {
+.insight-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.insight-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-height: 140px;
+}
+
+.insight-value {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.2;
+}
+
+.section-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.section-head h3,
+.card h3 {
+    margin-top: 0;
+    margin-bottom: 0.25rem;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+.compact-table {
+    min-width: 100%;
+}
+
+.analytics-panels {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1rem;
-    margin-bottom: 1rem;
-}
-
-.chart-card h3 {
-    margin-top: 0;
-}
-
-.chart-card canvas {
-    min-height: 280px;
+    margin-top: 1rem;
 }
 
 .dashboard-tables {
     display: grid;
-    grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
+    grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
     gap: 1rem;
+}
+
+.dashboard-tables > .card:first-child {
+    grid-column: 1 / -1;
 }
 
 .curfox-option {
