@@ -131,13 +131,26 @@ public class DashboardService {
             orderRow.setWaybillNo(String.valueOf(row[1]));
             orderRow.setCustomerName(String.valueOf(row[2]));
             orderRow.setDistrict(String.valueOf(row[3]));
-            orderRow.setCreatedAt((LocalDateTime) row[4]);
+            orderRow.setCreatedAt(convertToLocalDateTime(row[4]));
             orderRow.setTotalSellingPrice(toBigDecimal(row[5]));
             orderRow.setNetProfit(toBigDecimal(row[6]));
             orderRow.setItemCount(((Number) row[7]).intValue());
             recent.add(orderRow);
         }
         return recent;
+    }
+
+    private static LocalDateTime convertToLocalDateTime(Object value) {
+        if (value == null) return null;
+        if (value instanceof LocalDateTime ldt) return ldt;
+        if (value instanceof java.sql.Timestamp ts) return ts.toLocalDateTime();
+        if (value instanceof java.util.Date d) return LocalDateTime.ofInstant(d.toInstant(), java.time.ZoneId.systemDefault());
+        // fallback: try parsing
+        try {
+            return LocalDateTime.parse(value.toString());
+        } catch (Exception ex) {
+            return null;
+        }
     }
 
     private static LocalDate toLocalDate(Object value) {
