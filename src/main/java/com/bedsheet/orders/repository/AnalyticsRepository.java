@@ -19,13 +19,16 @@ public interface AnalyticsRepository extends JpaRepository<CustomerOrder, Long> 
     List<Object[]> summarizeOrders(@Param("from") LocalDateTime from);
 
     @Query(value = """
-            SELECT daily.day,
+            /* Use H2-friendly date expression and avoid alias name 'day' which
+               can be interpreted as a function/reserved word. Use order_day
+               so the same native query works on MySQL and H2 fallback. */
+            SELECT daily.order_day,
                    COUNT(daily.order_id) AS order_count,
                    COALESCE(SUM(daily.revenue), 0) AS revenue,
                    COALESCE(SUM(daily.net_profit), 0) AS net_profit,
                    COALESCE(SUM(daily.items_sold), 0) AS items_sold
             FROM (
-                SELECT DATE(o.created_at) AS day,
+                SELECT CAST(o.created_at AS DATE) AS order_day,
                        o.id AS order_id,
                        (o.cod_value - o.delivery_charge) AS revenue,
                        o.net_profit AS net_profit,
@@ -35,8 +38,8 @@ public interface AnalyticsRepository extends JpaRepository<CustomerOrder, Long> 
                 FROM orders o
                 WHERE (:from IS NULL OR o.created_at >= :from)
             ) daily
-            GROUP BY daily.day
-            ORDER BY daily.day
+            GROUP BY daily.order_day
+            ORDER BY daily.order_day
             """, nativeQuery = true)
     List<Object[]> dailyTrend(@Param("from") LocalDateTime from);
 
