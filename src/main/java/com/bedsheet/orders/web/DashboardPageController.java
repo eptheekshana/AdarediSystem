@@ -2,6 +2,8 @@ package com.bedsheet.orders.web;
 
 import com.bedsheet.orders.dto.dashboard.DashboardView;
 import com.bedsheet.orders.service.DashboardService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class DashboardPageController {
 
     private final DashboardService dashboardService;
+    private static final Logger log = LoggerFactory.getLogger(DashboardPageController.class);
 
     public DashboardPageController(DashboardService dashboardService) {
         this.dashboardService = dashboardService;
@@ -19,8 +22,14 @@ public class DashboardPageController {
     @GetMapping("/dashboard")
     public String dashboard(@RequestParam(defaultValue = "30") int days, Model model) {
         int periodDays = normalizeDays(days);
-        DashboardView dashboard = dashboardService.buildDashboard(periodDays);
-        model.addAttribute("dashboard", dashboard);
+        try {
+            DashboardView dashboard = dashboardService.buildDashboard(periodDays);
+            model.addAttribute("dashboard", dashboard);
+        } catch (Exception ex) {
+            // Log with stacktrace so Heroku logs include the underlying cause for the 500
+            log.error("Failed to build dashboard for periodDays={}", periodDays, ex);
+            throw ex;
+        }
         model.addAttribute("periodDays", periodDays);
         return "dashboard/index";
     }
