@@ -111,11 +111,11 @@ public class HerokuDatasourceEnvironmentPostProcessor implements EnvironmentPost
         if (password != null && env.getProperty("spring.datasource.password") == null) {
             m.put("spring.datasource.password", password);
         }
-        // If using H2, ensure JPA uses the H2 dialect and enable schema auto-update by default for convenience
-        if (jdbcUrl != null && jdbcUrl.startsWith("jdbc:h2") && env.getProperty("spring.jpa.database-platform") == null) {
+        // If using H2, force JPA to use the H2 dialect and enable schema auto-update by default.
+        // We intentionally override existing JPA dialect/ddl settings when we fallback to H2 so
+        // Hibernate generates H2-compatible DDL instead of MySQL-specific SQL which H2 can't parse.
+        if (jdbcUrl != null && jdbcUrl.startsWith("jdbc:h2")) {
             m.put("spring.jpa.database-platform", "org.hibernate.dialect.H2Dialect");
-        }
-        if (jdbcUrl != null && jdbcUrl.startsWith("jdbc:h2") && env.getProperty("spring.jpa.hibernate.ddl-auto") == null) {
             m.put("spring.jpa.hibernate.ddl-auto", "update");
         }
 
