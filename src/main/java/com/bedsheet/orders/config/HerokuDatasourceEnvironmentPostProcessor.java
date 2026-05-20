@@ -75,10 +75,21 @@ public class HerokuDatasourceEnvironmentPostProcessor implements EnvironmentPost
                 }
 
                 applyProps(environment, jdbcUrl, username, password);
+                System.out.println("HerokuDatasourceEnvironmentPostProcessor: applied JDBC URL from env " + envName + ": " + jdbcUrl);
                 return;
             } catch (Exception ex) {
                 // ignore and try next candidate
             }
+        }
+
+        // No Heroku-style DB URL found — apply an in-memory H2 fallback so the application can start
+        try {
+            String h2Url = "jdbc:h2:mem:bedsheet_orders;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE";
+            System.out.println("HerokuDatasourceEnvironmentPostProcessor: no external DB found, applying H2 fallback: " + h2Url);
+            applyProps(environment, h2Url, "sa", "");
+        } catch (Exception ex) {
+            // shouldn't happen, but don't prevent app startup
+            System.out.println("HerokuDatasourceEnvironmentPostProcessor: failed to apply H2 fallback: " + ex.getMessage());
         }
     }
 
@@ -88,14 +99,28 @@ public class HerokuDatasourceEnvironmentPostProcessor implements EnvironmentPost
         if (env.getProperty("spring.datasource.url") == null) {
             m.put("spring.datasource.url", jdbcUrl);
         }
+        // set a sensible driver class if absent
+        if (env.getProperty("spring.datasource.driver-class-name") == null) {
+            if (jdbcUrl != null && jdbcUrl.startsWith("jdbc:h2")) {
+                m.put("spring.datasource.driver-class-name", "org.h2.Driver");
+            }
+        }
         if (username != null && env.getProperty("spring.datasource.username") == null) {
             m.put("spring.datasource.username", username);
         }
         if (password != null && env.getProperty("spring.datasource.password") == null) {
             m.put("spring.datasource.password", password);
         }
+        // If using H2, ensure JPA uses the H2 dialect and enable schema auto-update by default for convenience
+        if (jdbcUrl != null && jdbcUrl.startsWith("jdbc:h2") && env.getProperty("spring.jpa.database-platform") == null) {
+            m.put("spring.jpa.database-platform", "org.hibernate.dialect.H2Dialect");
+        }
+        if (jdbcUrl != null && jdbcUrl.startsWith("jdbc:h2") && env.getProperty("spring.jpa.hibernate.ddl-auto") == null) {
+            m.put("spring.jpa.hibernate.ddl-auto", "update");
+        }
 
         if (!m.isEmpty()) {
+            System.out.println("HerokuDatasourceEnvironmentPostProcessor: injecting properties: " + m.keySet());
             env.getPropertySources().addFirst(new MapPropertySource("heroku-database", m));
         }
     }
