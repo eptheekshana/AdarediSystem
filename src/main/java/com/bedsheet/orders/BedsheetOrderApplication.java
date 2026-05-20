@@ -13,6 +13,13 @@ public class BedsheetOrderApplication {
     }
 
     private static void configureDatasourceFromHerokuEnv() {
+        // If explicit Spring datasource env vars are present, prefer them and skip legacy URL parsing.
+        if (hasText(System.getenv("SPRING_DATASOURCE_URL"))
+                || hasText(System.getenv("SPRING_DATASOURCE_USERNAME"))
+                || hasText(System.getenv("SPRING_DATASOURCE_PASSWORD"))) {
+            return;
+        }
+
         String[] candidates = new String[]{"JDBC_DATABASE_URL", "CLEARDB_DATABASE_URL", "JAWSDB_URL", "DATABASE_URL"};
         for (String name : candidates) {
             String raw = System.getenv(name);
@@ -66,5 +73,9 @@ public class BedsheetOrderApplication {
                 // ignore and try next
             }
         }
+    }
+
+    private static boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 }
