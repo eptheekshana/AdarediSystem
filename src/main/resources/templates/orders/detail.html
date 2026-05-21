@@ -28,7 +28,16 @@
     <p class="error" th:if="${errorMessage}" th:text="${errorMessage}"></p>
 
     <section class="card" th:object="${order}">
-        <h2 th:text="'Order — Waybill ' + *{waybillNo}">Order</h2>
+        <div class="row between wrap">
+            <div>
+                <h2 th:text="'Order — Waybill ' + *{waybillNo}">Order</h2>
+                <p class="hint">Created on <span th:text="${#temporals.format(order.createdAt, 'yyyy-MM-dd HH:mm')}"></span></p>
+            </div>
+            <div class="row wrap">
+                <a class="btn secondary" th:href="@{/orders/{id}/edit(id=${order.id})}">Edit order</a>
+                <a class="btn subtle" th:href="@{/orders}">Back to orders</a>
+            </div>
+        </div>
 
         <div class="grid two-col meta">
             <p><strong>Name:</strong> <span th:text="*{customerName}"></span></p>

@@ -9,6 +9,7 @@ import com.bedsheet.orders.model.BedSize;
 import com.bedsheet.orders.model.BedsheetType;
 import com.bedsheet.orders.model.CurfoxSyncStatus;
 import com.bedsheet.orders.model.CustomerOrder;
+import com.bedsheet.orders.model.OrderItem;
 import com.bedsheet.orders.service.DuplicateWaybillException;
 import com.bedsheet.orders.service.OrderService;
 import com.bedsheet.orders.service.PricingService;
@@ -63,7 +64,7 @@ public class OrderPageController {
 
     @GetMapping("/orders/new")
     public String newOrderForm(Model model) throws JsonProcessingException {
-        prepareFormModel(model, sampleOrder());
+        prepareFormModel(model, sampleOrder(), false, null);
         return "orders/form";
     }
 
@@ -74,7 +75,7 @@ public class OrderPageController {
             Model model,
             RedirectAttributes redirectAttributes) throws JsonProcessingException {
         if (bindingResult.hasErrors()) {
-            prepareFormModel(model, order);
+            prepareFormModel(model, order, false, null);
             return "orders/form";
         }
 
@@ -94,7 +95,38 @@ public class OrderPageController {
             return "redirect:/orders/" + saved.getId();
         } catch (DuplicateWaybillException ex) {
             bindingResult.rejectValue("waybillNo", "duplicate", ex.getMessage());
-            prepareFormModel(model, order);
+            prepareFormModel(model, order, false, null);
+            return "orders/form";
+        }
+    }
+
+    @GetMapping("/orders/{id}/edit")
+    public String edit(@PathVariable Long id, Model model) throws JsonProcessingException {
+        CustomerOrder order = orderService.findById(id);
+        prepareFormModel(model, toFormOrder(order), true, id);
+        return "orders/form";
+    }
+
+    @PostMapping("/orders/{id}")
+    public String update(
+            @PathVariable Long id,
+            @Valid @ModelAttribute("order") OrderRequest order,
+            BindingResult bindingResult,
+            Model model,
+            RedirectAttributes redirectAttributes) throws JsonProcessingException {
+        if (bindingResult.hasErrors()) {
+            prepareFormModel(model, order, true, id);
+            return "orders/form";
+        }
+
+        try {
+            CustomerOrder saved = orderService.update(id, order);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Order updated successfully. Courier sync was reset; re-sync if needed.");
+            return "redirect:/orders/" + saved.getId();
+        } catch (DuplicateWaybillException ex) {
+            bindingResult.rejectValue("waybillNo", "duplicate", ex.getMessage());
+            prepareFormModel(model, order, true, id);
             return "orders/form";
         }
     }
@@ -135,11 +167,16 @@ public class OrderPageController {
         }
     }
 
-    private void prepareFormModel(Model model, OrderRequest order) throws JsonProcessingException {
+    private void prepareFormModel(Model model, OrderRequest order, boolean editMode, Long orderId) throws JsonProcessingException {
         model.addAttribute("order", order);
         model.addAttribute("bedsheetTypes", BedsheetType.values());
         model.addAttribute("bedSizes", BedSize.values());
         model.addAttribute("priceRows", pricingService.getPriceRows());
+        model.addAttribute("isEditMode", editMode);
+        model.addAttribute("pageTitle", editMode ? "Edit order" : "Create order");
+        model.addAttribute("submitLabel", editMode ? "Update order" : "Save order");
+        model.addAttribute("formAction", editMode ? "/orders/" + orderId : "/orders");
+        model.addAttribute("cancelHref", editMode ? "/orders/" + orderId : "/orders");
         addCurfoxContext(model);
         model.addAttribute("sellingPricesJson",
                 objectMapper.writeValueAsString(pricingService.getSellingPricesForJson()));
@@ -171,5 +208,36 @@ public class OrderPageController {
         item.setQuantity(1);
         order.setItems(Arrays.asList(item));
         return order;
+    }
+
+    private static OrderRequest toFormOrder(CustomerOrder order) {
+        OrderRequest request = new OrderRequest();
+        request.setWaybillNo(order.getWaybillNo());
+        request.setCustomerName(order.getCustomerName());
+        request.setPrimaryPhone(order.getPrimaryPhone());
+        request.setSecondaryPhone(order.getSecondaryPhone());
+        request.setAddress(order.getAddress());
+        request.setNearestCity(order.getNearestCity());
+        request.setDistrict(order.getDistrict());
+        request.setWeight(order.getWeight());
+        request.setDeliveryCharge(order.getDeliveryCharge());
+        request.setCodValue(order.getCodValue());
+        request.setDiscount(order.getDiscount());
+        request.setCreatedAt(order.getCreatedAt());
+        request.setPushToCurfox(false);
+        request.setItems(order.getItems().stream()
+                .map(OrderPageController::toFormItem)
+                .collect(java.util.stream.Collectors.toList()));
+        return request;
+    }
+
+    private static OrderItemRequest toFormItem(OrderItem item) {
+        OrderItemRequest request = new OrderItemRequest();
+        request.setBedsheetType(item.getBedsheetType());
+        request.setBedSize(item.getBedSize());
+        request.setBeddingDesign(item.getBeddingDesign());
+        request.setQuantity(item.getQuantity());
+        request.setPillowcaseQuantity(item.getPillowcaseQuantity());
+        return request;
     }
 }

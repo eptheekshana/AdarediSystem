@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADAREDI.COM - New Order</title>
+    <title th:text="'ADAREDI.COM - ' + ${pageTitle}">ADAREDI.COM - New Order</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
     <script>
         (function () {
@@ -25,14 +25,14 @@
 
 <main class="container layout">
     <section class="card main-panel">
-        <h2>Create order</h2>
+        <h2 th:text="${pageTitle}">Create order</h2>
         <p class="hint">Add one or more products. Selling price and profit use your fixed price list. Discount is subtracted from total profit.</p>
         <p class="hint curfox-profile" th:if="${curfoxEnabled and not #strings.isEmpty(curfoxBusinessName)}">
             Royal Express: <strong th:text="${curfoxBusinessName}"></strong>
             · Origin: <strong th:text="${curfoxOrigin}"></strong>
         </p>
 
-        <form th:action="@{/orders}" th:object="${order}" method="post" id="orderForm">
+        <form th:action="${formAction}" th:object="${order}" method="post" id="orderForm">
             <fieldset>
                 <legend>Delivery &amp; customer</legend>
                 <div class="grid two-col">
@@ -56,12 +56,14 @@
                     <label class="full">Address *
                         <textarea th:field="*{address}" rows="2" required></textarea>
                     </label>
-                    <label class="city-search-wrap">Destination city (Royal Express) *
-                        <input type="text" th:field="*{nearestCity}" id="nearestCityInput"
-                               autocomplete="off" required placeholder="Type to search… e.g. Kadaw">
+                    <div class="city-search-wrap full">
+                        <label>Destination city (Royal Express) *
+                            <input type="text" th:field="*{nearestCity}" id="nearestCityInput"
+                                   autocomplete="off" required placeholder="Type to search… e.g. Kadaw">
+                            <span class="hint">Suggestions load from Royal Express as you type (min 2 letters).</span>
+                        </label>
                         <ul id="citySuggestions" class="city-suggestions" hidden></ul>
-                        <span class="hint">Suggestions load from Royal Express as you type (min 2 letters).</span>
-                    </label>
+                    </div>
                     <label>District / state (Royal Express) *
                         <input type="text" th:field="*{district}" id="districtInput" required
                                placeholder="Auto-filled when you pick a city">
@@ -129,15 +131,21 @@
                 <p>Net profit (after discount): <strong id="netProfit">LKR 0</strong></p>
             </div>
 
-            <label th:if="${curfoxEnabled}" class="curfox-option full">
+            <label th:if="${!isEditMode and curfoxEnabled}" class="curfox-option full">
                 <input type="checkbox" th:field="*{pushToCurfox}" value="true">
                 Push to Royal Express (Curfox) when saving
             </label>
-            <p th:unless="${curfoxEnabled}" class="hint full">
+            <p th:if="${isEditMode}" class="hint full">
+                This order is being edited locally. Save changes first, then use the order details page to re-sync to Royal Express if needed.
+            </p>
+            <p th:unless="${curfoxEnabled or isEditMode}" class="hint full">
                 Royal Express API is not configured. Add CURFOX_* settings in <code>.env</code>.
             </p>
 
-            <button type="submit" class="btn primary">Save order</button>
+            <div class="row wrap">
+                <button type="submit" class="btn primary" th:text="${submitLabel}">Save order</button>
+                <a class="btn secondary" th:href="${cancelHref}">Cancel</a>
+            </div>
         </form>
     </section>
 

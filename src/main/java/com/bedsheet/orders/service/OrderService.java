@@ -4,6 +4,7 @@ import com.bedsheet.orders.curfox.CurfoxOrderSyncService;
 import com.bedsheet.orders.curfox.CurfoxProperties;
 import com.bedsheet.orders.dto.OrderItemRequest;
 import com.bedsheet.orders.dto.OrderRequest;
+import com.bedsheet.orders.model.CurfoxSyncStatus;
 import com.bedsheet.orders.model.CustomerOrder;
 import com.bedsheet.orders.model.OrderItem;
 import com.bedsheet.orders.repository.OrderRepository;
@@ -75,6 +76,25 @@ public class OrderService {
         return saved;
     }
 
+    @Transactional
+    public CustomerOrder update(Long id, OrderRequest request) {
+        CustomerOrder order = findById(id);
+        String requestedWaybill = request.getWaybillNo().trim();
+        if (!order.getWaybillNo().equals(requestedWaybill) && orderRepository.existsByWaybillNo(requestedWaybill)) {
+            throw new DuplicateWaybillException("Waybill already exists: " + request.getWaybillNo());
+        }
+
+        applyOrderFields(order, request);
+        order.getItems().clear();
+        for (OrderItemRequest itemRequest : request.getItems()) {
+            order.addItem(buildItem(itemRequest));
+        }
+
+        calculateTotals(order);
+        resetCurfoxState(order);
+        return orderRepository.save(order);
+    }
+
     private boolean shouldSyncToCurfox(OrderRequest request) {
         return request.isPushToCurfox()
                 && curfoxProperties.isAutoSyncOnCreate()
@@ -130,7 +150,7 @@ public class OrderService {
             grossProfit = grossProfit.add(item.getLineProfit());
         }
 
-        BigDecimal discount = order.getDiscount();
+        BigDecimal discount = zeroIfNull(order.getDiscount());
         BigDecimal deliveryCharge = zeroIfNull(order.getDeliveryCharge());
         BigDecimal deliveryDeduction = deliveryCharge.subtract(DELIVERY_CHARGE_FREE_LIMIT);
         if (deliveryDeduction.compareTo(BigDecimal.ZERO) < 0) {
@@ -145,6 +165,13 @@ public class OrderService {
         order.setTotalSellingPrice(totalSelling);
         order.setGrossProfit(grossProfit);
         order.setNetProfit(netProfit);
+    }
+
+    private static void resetCurfoxState(CustomerOrder order) {
+        order.setCurfoxSyncStatus(CurfoxSyncStatus.NOT_SYNCED);
+        order.setCurfoxSyncedAt(null);
+        order.setCurfoxSyncMessage(null);
+        order.setCurfoxLastStatus(null);
     }
 
     private static BigDecimal zeroIfNull(BigDecimal value) {
