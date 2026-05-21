@@ -35,6 +35,9 @@
             </div>
             <div class="row wrap">
                 <a class="btn secondary" th:href="@{/orders/{id}/edit(id=${order.id})}">Edit order</a>
+                <form th:action="@{/orders/{id}/delete(id=${order.id})}" method="post" onsubmit="return confirm('Delete this order permanently?');">
+                    <button type="submit" class="btn subtle">Delete order</button>
+                </form>
                 <a class="btn subtle" th:href="@{/orders}">Back to orders</a>
             </div>
         </div>

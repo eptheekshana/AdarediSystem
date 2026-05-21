@@ -139,6 +139,15 @@ public class OrderPageController {
         return "orders/detail";
     }
 
+    @PostMapping("/orders/{id}/delete")
+    public String delete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        CustomerOrder order = orderService.findById(id);
+        orderService.deleteById(id);
+        redirectAttributes.addFlashAttribute("successMessage",
+                "Order " + order.getWaybillNo() + " was deleted successfully.");
+        return "redirect:/orders";
+    }
+
     @PostMapping("/orders/{id}/curfox/sync")
     public String syncCurfox(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         CustomerOrder order = curfoxOrderSyncService.syncOrder(id);

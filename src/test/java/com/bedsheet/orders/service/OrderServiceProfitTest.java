@@ -3,6 +3,7 @@ package com.bedsheet.orders.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.bedsheet.orders.dto.OrderItemRequest;
@@ -132,6 +133,15 @@ class OrderServiceProfitTest {
         assertNull(saved.getCurfoxSyncedAt());
         assertNull(saved.getCurfoxSyncMessage());
         assertNull(saved.getCurfoxLastStatus());
+    }
+
+    @Test
+    void deleteByIdRemovesOrder() {
+        when(orderRepository.existsById(7L)).thenReturn(true);
+
+        orderService.deleteById(7L);
+
+        verify(orderRepository).deleteById(7L);
     }
 
     private static OrderRequest baseOrder() {
