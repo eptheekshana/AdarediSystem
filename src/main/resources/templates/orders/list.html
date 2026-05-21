@@ -32,37 +32,81 @@
 
         <div th:if="${#lists.isEmpty(orders)}" class="empty-state">No orders yet.</div>
 
-        <table th:if="${!#lists.isEmpty(orders)}" class="data-table">
-            <thead>
-            <tr>
-                <th>Date</th>
-                <th>Waybill</th>
-                <th>Customer</th>
-                <th>Phone</th>
-                <th>Items</th>
-                <th>Selling</th>
-                <th>Net profit</th>
-                <th th:if="${curfoxEnabled}">Courier</th>
-                <th></th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="o : ${orders}">
-                <td th:text="${#temporals.format(o.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
-                <td th:text="${o.waybillNo}"></td>
-                <td th:text="${o.customerName}"></td>
-                <td th:text="${o.primaryPhone}"></td>
-                <td th:text="${#lists.size(o.items)}"></td>
-                <td th:text="'LKR ' + ${o.totalSellingPrice}"></td>
-                <td th:text="'LKR ' + ${o.netProfit}"></td>
-                <td th:if="${curfoxEnabled}">
-                    <span class="badge" th:classappend="' badge-' + ${o.curfoxSyncStatus.name()}"
+        <div th:if="${!#lists.isEmpty(orders)}" class="record-list mobile-only">
+            <article class="card subtle record-card" th:each="o : ${orders}">
+                <div class="row between wrap">
+                    <div>
+                        <span class="kpi-label">Waybill</span>
+                        <strong class="insight-value" th:text="${o.waybillNo}">WB123</strong>
+                    </div>
+                    <span class="badge" th:if="${curfoxEnabled}" th:classappend="' badge-' + ${o.curfoxSyncStatus.name()}"
                           th:text="${o.curfoxSyncStatus}"></span>
-                </td>
-                <td><a th:href="@{/orders/{id}(id=${o.id})}">View</a></td>
-            </tr>
-            </tbody>
-        </table>
+                </div>
+                <div class="record-grid">
+                    <div class="record-field">
+                        <span class="record-label">Date</span>
+                        <span class="record-value" th:text="${#temporals.format(o.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+                    </div>
+                    <div class="record-field">
+                        <span class="record-label">Customer</span>
+                        <span class="record-value" th:text="${o.customerName}"></span>
+                    </div>
+                    <div class="record-field">
+                        <span class="record-label">Phone</span>
+                        <span class="record-value" th:text="${o.primaryPhone}"></span>
+                    </div>
+                    <div class="record-field">
+                        <span class="record-label">Items</span>
+                        <span class="record-value" th:text="${#lists.size(o.items)}"></span>
+                    </div>
+                    <div class="record-field">
+                        <span class="record-label">Selling</span>
+                        <span class="record-value" th:text="'LKR ' + ${o.totalSellingPrice}"></span>
+                    </div>
+                    <div class="record-field">
+                        <span class="record-label">Net profit</span>
+                        <span class="record-value" th:text="'LKR ' + ${o.netProfit}"></span>
+                    </div>
+                </div>
+                <div class="record-actions">
+                    <a class="btn secondary" th:href="@{/orders/{id}(id=${o.id})}">View order</a>
+                </div>
+            </article>
+        </div>
+
+        <div class="desktop-only table-wrap" th:if="${!#lists.isEmpty(orders)}">
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Waybill</th>
+                    <th>Customer</th>
+                    <th>Phone</th>
+                    <th>Items</th>
+                    <th>Selling</th>
+                    <th>Net profit</th>
+                    <th th:if="${curfoxEnabled}">Courier</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="o : ${orders}">
+                    <td th:text="${#temporals.format(o.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+                    <td th:text="${o.waybillNo}"></td>
+                    <td th:text="${o.customerName}"></td>
+                    <td th:text="${o.primaryPhone}"></td>
+                    <td th:text="${#lists.size(o.items)}"></td>
+                    <td th:text="'LKR ' + ${o.totalSellingPrice}"></td>
+                    <td th:text="'LKR ' + ${o.netProfit}"></td>
+                    <td th:if="${curfoxEnabled}">
+                        <span class="badge" th:classappend="' badge-' + ${o.curfoxSyncStatus.name()}"
+                              th:text="${o.curfoxSyncStatus}"></span>
+                    </td>
+                    <td><a th:href="@{/orders/{id}(id=${o.id})}">View</a></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </section>
 </main>
 <script th:src="@{/js/theme.js}"></script>

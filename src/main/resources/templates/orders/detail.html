@@ -76,34 +76,82 @@
         </div>
 
         <h3>Products</h3>
-        <table class="data-table">
-            <thead>
-            <tr>
-                <th>Type</th>
-                <th>Size</th>
-                <th>Design</th>
-                <th>Qty</th>
-                <th>Pillow cases</th>
-                <th>Unit sell</th>
-                <th>Unit profit</th>
-                <th>Line sell</th>
-                <th>Line profit</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="item : *{items}">
-                <td th:text="${item.bedsheetType}"></td>
-                <td th:text="${#strings.replace(item.bedSize.name(), '_', ' ')}"></td>
-                <td th:text="${item.beddingDesign}"></td>
-                <td th:text="${item.quantity}"></td>
-                <td th:text="${item.pillowcaseQuantity}"></td>
-                <td th:text="${item.unitSellingPrice}"></td>
-                <td th:text="${item.unitProfit}"></td>
-                <td th:text="${item.lineSellingPrice}"></td>
-                <td th:text="${item.lineProfit}"></td>
-            </tr>
-            </tbody>
-        </table>
+        <div class="record-list mobile-only">
+            <article class="card subtle record-card" th:each="item, stat : *{items}">
+                <div class="row between wrap">
+                    <div>
+                        <span class="kpi-label">Product</span>
+                        <strong class="insight-value" th:text="'Item ' + ${stat.index + 1}">Item 1</strong>
+                    </div>
+                    <span class="badge">Qty <span th:text="${item.quantity}"></span></span>
+                </div>
+                <div class="record-grid">
+                    <div class="record-field">
+                        <span class="record-label">Type</span>
+                        <span class="record-value" th:text="${item.bedsheetType}"></span>
+                    </div>
+                    <div class="record-field">
+                        <span class="record-label">Size</span>
+                        <span class="record-value" th:text="${#strings.replace(item.bedSize.name(), '_', ' ')}"></span>
+                    </div>
+                    <div class="record-field">
+                        <span class="record-label">Design</span>
+                        <span class="record-value" th:text="${item.beddingDesign}"></span>
+                    </div>
+                    <div class="record-field">
+                        <span class="record-label">Pillow cases</span>
+                        <span class="record-value" th:text="${item.pillowcaseQuantity}"></span>
+                    </div>
+                    <div class="record-field">
+                        <span class="record-label">Unit sell</span>
+                        <span class="record-value" th:text="${item.unitSellingPrice}"></span>
+                    </div>
+                    <div class="record-field">
+                        <span class="record-label">Unit profit</span>
+                        <span class="record-value" th:text="${item.unitProfit}"></span>
+                    </div>
+                    <div class="record-field">
+                        <span class="record-label">Line sell</span>
+                        <span class="record-value" th:text="${item.lineSellingPrice}"></span>
+                    </div>
+                    <div class="record-field">
+                        <span class="record-label">Line profit</span>
+                        <span class="record-value" th:text="${item.lineProfit}"></span>
+                    </div>
+                </div>
+            </article>
+        </div>
+
+        <div class="desktop-only table-wrap">
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Size</th>
+                    <th>Design</th>
+                    <th>Qty</th>
+                    <th>Pillow cases</th>
+                    <th>Unit sell</th>
+                    <th>Unit profit</th>
+                    <th>Line sell</th>
+                    <th>Line profit</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item : *{items}">
+                    <td th:text="${item.bedsheetType}"></td>
+                    <td th:text="${#strings.replace(item.bedSize.name(), '_', ' ')}"></td>
+                    <td th:text="${item.beddingDesign}"></td>
+                    <td th:text="${item.quantity}"></td>
+                    <td th:text="${item.pillowcaseQuantity}"></td>
+                    <td th:text="${item.unitSellingPrice}"></td>
+                    <td th:text="${item.unitProfit}"></td>
+                    <td th:text="${item.lineSellingPrice}"></td>
+                    <td th:text="${item.lineProfit}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
 
         <div class="summary card subtle">
             <p>Total selling: <strong th:text="'LKR ' + *{totalSellingPrice}"></strong></p>
