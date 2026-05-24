@@ -46,7 +46,7 @@ public class CustomerOrder {
     private String district;
 
     @Column(precision = 10, scale = 2)
-    private BigDecimal weight;
+    private BigDecimal weight = BigDecimal.ONE;
 
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal deliveryCharge = BigDecimal.ZERO;

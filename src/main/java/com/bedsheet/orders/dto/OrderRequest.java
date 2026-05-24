@@ -32,7 +32,7 @@ public class OrderRequest {
     @NotBlank
     private String district;
 
-    private BigDecimal weight;
+    private BigDecimal weight = BigDecimal.ONE;
 
     @NotNull
     private BigDecimal deliveryCharge = BigDecimal.ZERO;

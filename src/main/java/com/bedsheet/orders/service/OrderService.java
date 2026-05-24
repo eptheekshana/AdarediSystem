@@ -109,7 +109,8 @@ public class OrderService {
         order.setAddress(request.getAddress().trim());
         order.setNearestCity(request.getNearestCity().trim());
         order.setDistrict(request.getDistrict().trim());
-        order.setWeight(request.getWeight());
+        // set weight: default to 1 when request doesn't provide a weight
+        order.setWeight(request.getWeight() == null ? BigDecimal.ONE : request.getWeight());
         if (request.getCreatedAt() != null) {
             order.setCreatedAt(request.getCreatedAt());
         }
