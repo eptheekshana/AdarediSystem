@@ -144,6 +144,40 @@
         </article>
 
         <article class="card">
+            <div class="section-head">
+                <div>
+                    <h3>Monthly analysis</h3>
+                    <p class="hint">Per-month performance with orders, items sold, revenue, and profitability.</p>
+                </div>
+            </div>
+            <div class="table-wrap">
+                <table class="data-table compact-table">
+                    <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th>Orders</th>
+                        <th>Qty sold</th>
+                        <th>Revenue (LKR)</th>
+                        <th>Net profit (LKR)</th>
+                        <th>Avg order (LKR)</th>
+                        <th>Profit %</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="m : ${dashboard.monthlyTrend}">
+                        <td th:text="${#temporals.format(m.date, 'yyyy-MM')}">2023-01</td>
+                        <td th:text="${m.orderCount}">0</td>
+                        <td th:text="${m.itemsSold}">0</td>
+                        <td th:text="${#numbers.formatDecimal(m.revenue, 0, 'COMMA', 0, 'POINT')}">0</td>
+                        <td th:text="${#numbers.formatDecimal(m.netProfit, 0, 'COMMA', 0, 'POINT')}">0</td>
+                        <td th:text="${#numbers.formatDecimal(m.avgOrderValue, 0, 'COMMA', 0, 'POINT')}">0</td>
+                        <td th:text="${#numbers.formatDecimal(m.profitMarginPercent, 1, 'COMMA', 2, 'POINT')}">0%</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </article>
+        <article class="card">
             <h3>Recent orders</h3>
             <p class="hint" th:if="${#lists.isEmpty(dashboard.recentOrders)}">No orders in this period.</p>
             <div class="table-wrap" th:if="${!#lists.isEmpty(dashboard.recentOrders)}">

@@ -17,6 +17,7 @@ public class DashboardView {
     private BigDecimal avgOrderValue = BigDecimal.ZERO;
     private BigDecimal avgNetProfit = BigDecimal.ZERO;
     private List<DailyMetric> dailyTrend = List.of();
+    private List<DailyMetric> monthlyTrend = List.of();
     private List<LabelMetric> byDistrict = List.of();
     private List<LabelMetric> byCity = List.of();
     private List<ProductTypeMetric> byBedsheetType = List.of();
@@ -117,6 +118,14 @@ public class DashboardView {
 
     public void setDailyTrend(List<DailyMetric> dailyTrend) {
         this.dailyTrend = dailyTrend;
+    }
+
+    public List<DailyMetric> getMonthlyTrend() {
+        return monthlyTrend;
+    }
+
+    public void setMonthlyTrend(List<DailyMetric> monthlyTrend) {
+        this.monthlyTrend = monthlyTrend;
     }
 
     public List<LabelMetric> getByDistrict() {

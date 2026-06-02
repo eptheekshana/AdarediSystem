@@ -43,6 +43,29 @@ public interface AnalyticsRepository extends JpaRepository<CustomerOrder, Long> 
             """, nativeQuery = true)
     List<Object[]> dailyTrend(@Param("from") LocalDateTime from);
 
+    @Query(value = """
+            SELECT monthly.order_year, monthly.order_month,
+                   COUNT(monthly.order_id) AS order_count,
+                   COALESCE(SUM(monthly.revenue), 0) AS revenue,
+                   COALESCE(SUM(monthly.net_profit), 0) AS net_profit,
+                   COALESCE(SUM(monthly.items_sold), 0) AS items_sold
+            FROM (
+                SELECT YEAR(o.created_at) AS order_year,
+                       MONTH(o.created_at) AS order_month,
+                       o.id AS order_id,
+                       (o.cod_value - o.delivery_charge) AS revenue,
+                       o.net_profit AS net_profit,
+                       COALESCE((SELECT SUM(i.quantity)
+                                 FROM order_items i
+                                 WHERE i.order_id = o.id), 0) AS items_sold
+                FROM orders o
+                WHERE (:from IS NULL OR o.created_at >= :from)
+            ) monthly
+            GROUP BY monthly.order_year, monthly.order_month
+            ORDER BY monthly.order_year, monthly.order_month
+            """, nativeQuery = true)
+    List<Object[]> monthlyTrend(@Param("from") LocalDateTime from);
+
     @Query("""
             SELECT o.district, COUNT(o), COALESCE(SUM(o.codValue - o.deliveryCharge), 0), COALESCE(SUM(o.netProfit), 0)
             FROM CustomerOrder o

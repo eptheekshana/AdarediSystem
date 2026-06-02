@@ -37,6 +37,7 @@ public class DashboardService {
         view.setPeriodDays(periodDays);
         applySummary(view, from);
         view.setDailyTrend(mapDaily(analyticsRepository.dailyTrend(from)));
+        view.setMonthlyTrend(mapMonthly(analyticsRepository.monthlyTrend(from)));
         view.setByDistrict(mapLabels(analyticsRepository.byDistrict(from)));
         view.setByCity(mapLabels(analyticsRepository.byCity(from)).stream().limit(8).toList());
         view.setByBedsheetType(mapTypes(analyticsRepository.byBedsheetType(from)));
@@ -82,6 +83,22 @@ public class DashboardService {
             java.math.BigDecimal revenue = toBigDecimal(row[2]);
             java.math.BigDecimal net = toBigDecimal(row[3]);
             long items = row.length > 4 && row[4] != null ? ((Number) row[4]).longValue() : 0L;
+            metrics.add(new DailyMetric(date, orders, revenue, net, items));
+        }
+        return metrics;
+    }
+
+    private List<DailyMetric> mapMonthly(List<Object[]> rows) {
+        List<DailyMetric> metrics = new ArrayList<>();
+        for (Object[] row : rows) {
+            // row: [year, month, order_count, revenue, net_profit, items_sold]
+            int year = ((Number) row[0]).intValue();
+            int month = ((Number) row[1]).intValue();
+            long orders = ((Number) row[2]).longValue();
+            java.math.BigDecimal revenue = toBigDecimal(row[3]);
+            java.math.BigDecimal net = toBigDecimal(row[4]);
+            long items = row.length > 5 && row[5] != null ? ((Number) row[5]).longValue() : 0L;
+            LocalDate date = LocalDate.of(year, month, 1);
             metrics.add(new DailyMetric(date, orders, revenue, net, items));
         }
         return metrics;
