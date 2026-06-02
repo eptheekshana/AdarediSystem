@@ -298,6 +298,12 @@ a:hover {
     transform: translateY(-2px);
 }
 
+.dashboard-modern .card:hover {
+    box-shadow: 0 32px 72px rgba(15, 23, 42, 0.18);
+    border-color: rgba(var(--accent-rgb), 0.28);
+    transform: translateY(-3px);
+}
+
 .card.subtle {
     background: var(--surface-soft);
     box-shadow: none;
@@ -585,6 +591,28 @@ select:focus {
         linear-gradient(180deg, rgba(var(--accent-rgb), 0.06), transparent 42%),
         var(--surface);
     border-left: 4px solid transparent;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+}
+
+.kpi.card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.kpi.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.16);
+}
+
+.kpi.card:hover::before {
+    opacity: 1;
 }
 
 .kpi.card:nth-child(4n + 1) { border-left-color: var(--accent); }
@@ -603,6 +631,10 @@ select:focus {
     font-size: 1.55rem;
     font-weight: 800;
     color: var(--text);
+    background: linear-gradient(135deg, var(--text), rgba(var(--accent-rgb), 0.95));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .kpi.accent {
@@ -813,16 +845,19 @@ select:focus {
         radial-gradient(circle at top right, rgba(var(--accent-2-rgb), 0.10), transparent 42%),
         linear-gradient(180deg, rgba(var(--accent-rgb), 0.08), transparent 34%),
         var(--surface);
+    transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
 }
 
-.monthly-tile-grid .tile-text::after,
-.monthly-tile-grid .tile-metric::after {
+.monthly-tile-grid .tile-metric::after,
+.monthly-tile-grid .tile-text::after {
     inset: auto 0 0 0;
 }
 
 .monthly-tile-grid .tile-metric:hover,
 .monthly-tile-grid .tile-text:hover {
     transform: translateY(-2px);
+    box-shadow: 0 12px 36px rgba(15, 23, 42, 0.12);
 }
 
 .dashboard-hero {
@@ -835,6 +870,18 @@ select:focus {
         radial-gradient(circle at top left, rgba(var(--accent-rgb), 0.16), transparent 32%),
         radial-gradient(circle at bottom right, rgba(var(--accent-2-rgb), 0.16), transparent 34%),
         var(--surface);
+    backdrop-filter: blur(12px);
+}
+
+.dashboard-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    padding: 1.35rem;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0));
+    pointer-events: none;
+    border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .hero-copy {
@@ -842,6 +889,8 @@ select:focus {
     flex-direction: column;
     gap: 0.65rem;
     padding: 0.2rem;
+    position: relative;
+    z-index: 1;
 }
 
 .hero-eyebrow {
@@ -856,6 +905,13 @@ select:focus {
     font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
+    transition: all 0.2s ease;
+}
+
+.hero-eyebrow:hover {
+    background: rgba(var(--accent-rgb), 0.18);
+    border-color: rgba(var(--accent-rgb), 0.28);
+    transform: scale(1.02);
 }
 
 .hero-badges {
@@ -875,6 +931,13 @@ select:focus {
     color: var(--text);
     font-size: 0.82rem;
     font-weight: 700;
+    transition: all 0.22s ease;
+}
+
+.hero-badge:hover {
+    border-color: rgba(var(--accent-rgb), 0.28);
+    background: rgba(var(--accent-rgb), 0.06);
+    transform: translateY(-1px);
 }
 
 .hero-side {
@@ -901,6 +964,29 @@ select:focus {
         linear-gradient(180deg, rgba(var(--accent-rgb), 0.06), transparent 80%),
         var(--panel-bg-strong);
     box-shadow: var(--shadow-soft);
+    transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+}
+
+.hero-metric::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0));
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.28s ease;
+}
+
+.hero-metric:hover {
+    transform: translateY(-2px);
+    border-color: rgba(var(--accent-rgb), 0.24);
+    box-shadow: 0 12px 32px rgba(var(--accent-rgb), 0.14);
+}
+
+.hero-metric:hover::before {
+    opacity: 1;
 }
 
 .hero-metric strong {
@@ -909,12 +995,26 @@ select:focus {
     font-size: 1.45rem;
     line-height: 1.12;
     font-weight: 800;
+    background: linear-gradient(135deg, var(--text), rgba(var(--accent-rgb), 0.95));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    transition: all 0.28s ease;
+}
+
+.hero-metric:hover strong {
+    transform: scale(1.04);
 }
 
 .hero h2 {
     font-size: clamp(1.8rem, 3vw, 2.55rem);
     line-height: 1.05;
     letter-spacing: -0.03em;
+    background: linear-gradient(135deg, var(--text), rgba(var(--accent-rgb), 0.9));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 900;
 }
 
 .monthly-tile-grid .badge {
@@ -976,6 +1076,29 @@ select:focus {
     background:
         radial-gradient(circle at top right, rgba(var(--accent-2-rgb), 0.08), transparent 36%),
         var(--surface);
+    transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+}
+
+.insight-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0));
+    opacity: 0;
+    transition: opacity 0.28s ease;
+    pointer-events: none;
+}
+
+.insight-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 36px rgba(15, 23, 42, 0.12);
+    border-color: rgba(var(--accent-rgb), 0.18);
+}
+
+.insight-card:hover::before {
+    opacity: 1;
 }
 
 .insight-value {
@@ -1033,12 +1156,20 @@ select:focus {
     display: flex;
     flex-direction: column;
     gap: 0.85rem;
+    transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .table-card .table-wrap {
     border-radius: 16px;
     border: 1px solid var(--border);
     background: var(--surface-solid);
+    overflow: hidden;
+    transition: box-shadow 0.28s ease;
+}
+
+.table-card:hover .table-wrap {
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
+    border-color: rgba(var(--accent-rgb), 0.14);
 }
 
 .dashboard-tables > .card:first-child {
