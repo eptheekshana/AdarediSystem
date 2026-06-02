@@ -588,7 +588,12 @@ select:focus {
 }
 
 .current-month-grid {
-    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 0.9rem;
+    padding-bottom: 0.25rem;
+    scroll-snap-type: x proximity;
 }
 
 .monthly-tile {
@@ -596,6 +601,11 @@ select:focus {
     display: flex;
     flex-direction: column;
     gap: 0.85rem;
+}
+
+.current-month-grid .monthly-tile {
+    flex: 0 0 220px;
+    scroll-snap-align: start;
 }
 
 .tile-metric {
