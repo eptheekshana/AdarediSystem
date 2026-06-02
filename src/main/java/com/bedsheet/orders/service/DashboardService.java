@@ -3,7 +3,6 @@ package com.bedsheet.orders.service;
 import com.bedsheet.orders.dto.dashboard.DailyMetric;
 import com.bedsheet.orders.dto.dashboard.DashboardView;
 import com.bedsheet.orders.dto.dashboard.LabelMetric;
-import com.bedsheet.orders.dto.dashboard.MonthlyAnalysisMetric;
 import com.bedsheet.orders.dto.dashboard.ProductTypeMetric;
 import com.bedsheet.orders.dto.dashboard.RecentOrderRow;
 import com.bedsheet.orders.repository.AnalyticsRepository;
@@ -37,35 +36,69 @@ public class DashboardService {
         DashboardView view = new DashboardView();
         view.setPeriodDays(periodDays);
         applySummary(view, from);
-        // Current month summary
-        LocalDate monthStart = LocalDate.now().withDayOfMonth(1);
-        LocalDateTime monthFrom = monthStart.atStartOfDay();
-        List<Object[]> monthRows = analyticsRepository.summarizeOrders(monthFrom);
-        if (!monthRows.isEmpty()) {
-            Object[] mrow = monthRows.get(0);
-            long mOrders = ((Number) mrow[0]).longValue();
-            java.math.BigDecimal mRevenue = toBigDecimal(mrow[1]);
-            java.math.BigDecimal mNet = toBigDecimal(mrow[3]);
-            view.setCurrentMonthOrders(mOrders);
-            view.setCurrentMonthRevenue(mRevenue);
-            view.setCurrentMonthNetProfit(mNet);
-        } else {
-            view.setCurrentMonthOrders(0L);
-            view.setCurrentMonthRevenue(java.math.BigDecimal.ZERO);
-            view.setCurrentMonthNetProfit(java.math.BigDecimal.ZERO);
-        }
-        Long mItems = analyticsRepository.totalItems(monthFrom);
-        view.setCurrentMonthItems(mItems == null ? 0L : mItems.longValue());
+        populateCurrentMonthSummary(view);
         view.setDailyTrend(mapDaily(analyticsRepository.dailyTrend(from)));
-        // Always show monthly analysis for all time (ignore the period filter)
-        view.setMonthlyTrend(mapMonthly(analyticsRepository.monthlyTrend(null)));
-        view.setMonthlyAnalysis(buildMonthlyAnalysis());
         view.setByDistrict(mapLabels(analyticsRepository.byDistrict(from)));
         view.setByCity(mapLabels(analyticsRepository.byCity(from)).stream().limit(8).toList());
         view.setByBedsheetType(mapTypes(analyticsRepository.byBedsheetType(from)));
         view.setByBedSize(mapLabelsFromBedSize(analyticsRepository.byBedSize(from)));
         view.setRecentOrders(mapRecent(analyticsRepository.recentOrders(from, PageRequest.of(0, 10))));
         return view;
+    }
+
+    private void populateCurrentMonthSummary(DashboardView view) {
+        LocalDateTime monthFrom = LocalDate.now().withDayOfMonth(1).atStartOfDay();
+        List<Object[]> rows = analyticsRepository.summarizeOrders(monthFrom);
+        if (rows.isEmpty()) {
+            view.setCurrentMonthOrders(0L);
+            view.setCurrentMonthItems(0L);
+            view.setCurrentMonthRevenue(BigDecimal.ZERO);
+            view.setCurrentMonthGrossProfit(BigDecimal.ZERO);
+            view.setCurrentMonthNetProfit(BigDecimal.ZERO);
+            view.setCurrentMonthCodTotal(BigDecimal.ZERO);
+            view.setCurrentMonthAvgOrderValue(BigDecimal.ZERO);
+            view.setCurrentMonthAvgProfitPerOrder(BigDecimal.ZERO);
+            view.setCurrentMonthTopDistrict("—");
+            view.setCurrentMonthTopCity("—");
+            view.setCurrentMonthBestProductType("—");
+            view.setCurrentMonthTopBedSize("—");
+            return;
+        }
+
+        Object[] row = rows.get(0);
+        long orders = ((Number) row[0]).longValue();
+        BigDecimal revenue = toBigDecimal(row[1]);
+        BigDecimal gross = toBigDecimal(row[2]);
+        BigDecimal net = toBigDecimal(row[3]);
+        BigDecimal cod = toBigDecimal(row[6]);
+        Long items = analyticsRepository.totalItems(monthFrom);
+
+        view.setCurrentMonthOrders(orders);
+        view.setCurrentMonthItems(items == null ? 0L : items.longValue());
+        view.setCurrentMonthRevenue(revenue);
+        view.setCurrentMonthGrossProfit(gross);
+        view.setCurrentMonthNetProfit(net);
+        view.setCurrentMonthCodTotal(cod);
+        if (orders > 0) {
+            view.setCurrentMonthAvgOrderValue(revenue.divide(BigDecimal.valueOf(orders), 2, RoundingMode.HALF_UP));
+            view.setCurrentMonthAvgProfitPerOrder(net.divide(BigDecimal.valueOf(orders), 2, RoundingMode.HALF_UP));
+        } else {
+            view.setCurrentMonthAvgOrderValue(BigDecimal.ZERO);
+            view.setCurrentMonthAvgProfitPerOrder(BigDecimal.ZERO);
+        }
+        applyCurrentMonthTopMetrics(view, monthFrom);
+    }
+
+    private void applyCurrentMonthTopMetrics(DashboardView view, LocalDateTime from) {
+        List<Object[]> districtRows = analyticsRepository.byDistrict(from);
+        List<Object[]> cityRows = analyticsRepository.byCity(from);
+        List<Object[]> typeRows = analyticsRepository.byBedsheetType(from);
+        List<Object[]> bedRows = analyticsRepository.byBedSize(from);
+
+        view.setCurrentMonthTopDistrict(districtRows.isEmpty() ? "—" : String.valueOf(districtRows.get(0)[0]));
+        view.setCurrentMonthTopCity(cityRows.isEmpty() ? "—" : String.valueOf(cityRows.get(0)[0]));
+        view.setCurrentMonthBestProductType(typeRows.isEmpty() ? "—" : String.valueOf(typeRows.get(0)[0]));
+        view.setCurrentMonthTopBedSize(bedRows.isEmpty() ? "—" : String.valueOf(bedRows.get(0)[0]).replace('_', ' '));
     }
 
     private void applySummary(DashboardView view, LocalDateTime from) {
@@ -111,90 +144,6 @@ public class DashboardService {
         return metrics;
     }
 
-    private List<DailyMetric> mapMonthly(List<Object[]> rows) {
-        List<DailyMetric> metrics = new ArrayList<>();
-        for (Object[] row : rows) {
-            // row: [year, month, order_count, revenue, net_profit, items_sold]
-            int year = ((Number) row[0]).intValue();
-            int month = ((Number) row[1]).intValue();
-            long orders = ((Number) row[2]).longValue();
-            java.math.BigDecimal revenue = toBigDecimal(row[3]);
-            java.math.BigDecimal net = toBigDecimal(row[4]);
-            long items = row.length > 5 && row[5] != null ? ((Number) row[5]).longValue() : 0L;
-            LocalDate date = LocalDate.of(year, month, 1);
-            metrics.add(new DailyMetric(date, orders, revenue, net, items));
-        }
-        return metrics;
-    }
-
-    private List<MonthlyAnalysisMetric> buildMonthlyAnalysis() {
-        List<Object[]> summaryRows = analyticsRepository.monthlySummary(null);
-        java.util.LinkedHashMap<String, MonthlyAnalysisMetric> byMonth = new java.util.LinkedHashMap<>();
-
-        for (Object[] row : summaryRows) {
-            String key = monthKey(row[0], row[1]);
-            MonthlyAnalysisMetric metric = new MonthlyAnalysisMetric();
-            metric.setMonth(toMonthDate(row[0], row[1]));
-            metric.setOrderCount(((Number) row[2]).longValue());
-            metric.setItemsSold(row[3] == null ? 0L : ((Number) row[3]).longValue());
-            metric.setRevenue(toBigDecimal(row[4]));
-            metric.setGrossProfit(toBigDecimal(row[5]));
-            metric.setNetProfit(toBigDecimal(row[6]));
-            metric.setCodTotal(toBigDecimal(row[7]));
-            byMonth.put(key, metric);
-        }
-
-        applyTopDistricts(byMonth, analyticsRepository.monthlyByDistrict(null));
-        applyTopCities(byMonth, analyticsRepository.monthlyByCity(null));
-        applyBestProductTypes(byMonth, analyticsRepository.monthlyByBedsheetType(null));
-        applyTopBedSizes(byMonth, analyticsRepository.monthlyByBedSize(null));
-
-        return new ArrayList<>(byMonth.values());
-    }
-
-    private static void applyTopDistricts(java.util.Map<String, MonthlyAnalysisMetric> byMonth, List<Object[]> rows) {
-        for (Object[] row : rows) {
-            MonthlyAnalysisMetric metric = byMonth.get(monthKey(row[0], row[1]));
-            if (metric != null && metric.getTopDistrict() == null) {
-                metric.setTopDistrict(String.valueOf(row[2]));
-            }
-        }
-    }
-
-    private static void applyTopCities(java.util.Map<String, MonthlyAnalysisMetric> byMonth, List<Object[]> rows) {
-        for (Object[] row : rows) {
-            MonthlyAnalysisMetric metric = byMonth.get(monthKey(row[0], row[1]));
-            if (metric != null && metric.getTopCity() == null) {
-                metric.setTopCity(String.valueOf(row[2]));
-            }
-        }
-    }
-
-    private static void applyBestProductTypes(java.util.Map<String, MonthlyAnalysisMetric> byMonth, List<Object[]> rows) {
-        for (Object[] row : rows) {
-            MonthlyAnalysisMetric metric = byMonth.get(monthKey(row[0], row[1]));
-            if (metric != null && metric.getBestProductType() == null) {
-                metric.setBestProductType(String.valueOf(row[2]));
-            }
-        }
-    }
-
-    private static void applyTopBedSizes(java.util.Map<String, MonthlyAnalysisMetric> byMonth, List<Object[]> rows) {
-        for (Object[] row : rows) {
-            MonthlyAnalysisMetric metric = byMonth.get(monthKey(row[0], row[1]));
-            if (metric != null && metric.getTopBedSize() == null) {
-                metric.setTopBedSize(String.valueOf(row[2]).replace('_', ' '));
-            }
-        }
-    }
-
-    private static String monthKey(Object yearValue, Object monthValue) {
-        return ((Number) yearValue).intValue() + "-" + ((Number) monthValue).intValue();
-    }
-
-    private static LocalDate toMonthDate(Object yearValue, Object monthValue) {
-        return LocalDate.of(((Number) yearValue).intValue(), ((Number) monthValue).intValue(), 1);
-    }
 
     private List<LabelMetric> mapLabels(List<Object[]> rows) {
         List<LabelMetric> metrics = new ArrayList<>();

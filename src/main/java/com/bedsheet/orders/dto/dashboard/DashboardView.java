@@ -17,13 +17,19 @@ public class DashboardView {
     private BigDecimal avgOrderValue = BigDecimal.ZERO;
     private BigDecimal avgNetProfit = BigDecimal.ZERO;
     private List<DailyMetric> dailyTrend = List.of();
-    private List<DailyMetric> monthlyTrend = List.of();
-    private List<MonthlyAnalysisMetric> monthlyAnalysis = List.of();
     // Current month summary
     private long currentMonthOrders;
     private long currentMonthItems;
     private BigDecimal currentMonthRevenue = BigDecimal.ZERO;
+    private BigDecimal currentMonthGrossProfit = BigDecimal.ZERO;
     private BigDecimal currentMonthNetProfit = BigDecimal.ZERO;
+    private BigDecimal currentMonthCodTotal = BigDecimal.ZERO;
+    private BigDecimal currentMonthAvgOrderValue = BigDecimal.ZERO;
+    private BigDecimal currentMonthAvgProfitPerOrder = BigDecimal.ZERO;
+    private String currentMonthTopDistrict;
+    private String currentMonthTopCity;
+    private String currentMonthBestProductType;
+    private String currentMonthTopBedSize;
     private List<LabelMetric> byDistrict = List.of();
     private List<LabelMetric> byCity = List.of();
     private List<ProductTypeMetric> byBedsheetType = List.of();
@@ -126,21 +132,6 @@ public class DashboardView {
         this.dailyTrend = dailyTrend;
     }
 
-    public List<DailyMetric> getMonthlyTrend() {
-        return monthlyTrend;
-    }
-
-    public void setMonthlyTrend(List<DailyMetric> monthlyTrend) {
-        this.monthlyTrend = monthlyTrend;
-    }
-
-    public List<MonthlyAnalysisMetric> getMonthlyAnalysis() {
-        return monthlyAnalysis;
-    }
-
-    public void setMonthlyAnalysis(List<MonthlyAnalysisMetric> monthlyAnalysis) {
-        this.monthlyAnalysis = monthlyAnalysis;
-    }
 
     public long getCurrentMonthOrders() {
         return currentMonthOrders;
@@ -166,12 +157,76 @@ public class DashboardView {
         this.currentMonthRevenue = currentMonthRevenue;
     }
 
+    public BigDecimal getCurrentMonthGrossProfit() {
+        return currentMonthGrossProfit;
+    }
+
+    public void setCurrentMonthGrossProfit(BigDecimal currentMonthGrossProfit) {
+        this.currentMonthGrossProfit = currentMonthGrossProfit;
+    }
+
     public BigDecimal getCurrentMonthNetProfit() {
         return currentMonthNetProfit;
     }
 
     public void setCurrentMonthNetProfit(BigDecimal currentMonthNetProfit) {
         this.currentMonthNetProfit = currentMonthNetProfit;
+    }
+
+    public BigDecimal getCurrentMonthCodTotal() {
+        return currentMonthCodTotal;
+    }
+
+    public void setCurrentMonthCodTotal(BigDecimal currentMonthCodTotal) {
+        this.currentMonthCodTotal = currentMonthCodTotal;
+    }
+
+    public BigDecimal getCurrentMonthAvgOrderValue() {
+        return currentMonthAvgOrderValue;
+    }
+
+    public void setCurrentMonthAvgOrderValue(BigDecimal currentMonthAvgOrderValue) {
+        this.currentMonthAvgOrderValue = currentMonthAvgOrderValue;
+    }
+
+    public BigDecimal getCurrentMonthAvgProfitPerOrder() {
+        return currentMonthAvgProfitPerOrder;
+    }
+
+    public void setCurrentMonthAvgProfitPerOrder(BigDecimal currentMonthAvgProfitPerOrder) {
+        this.currentMonthAvgProfitPerOrder = currentMonthAvgProfitPerOrder;
+    }
+
+    public String getCurrentMonthTopDistrict() {
+        return currentMonthTopDistrict;
+    }
+
+    public void setCurrentMonthTopDistrict(String currentMonthTopDistrict) {
+        this.currentMonthTopDistrict = currentMonthTopDistrict;
+    }
+
+    public String getCurrentMonthTopCity() {
+        return currentMonthTopCity;
+    }
+
+    public void setCurrentMonthTopCity(String currentMonthTopCity) {
+        this.currentMonthTopCity = currentMonthTopCity;
+    }
+
+    public String getCurrentMonthBestProductType() {
+        return currentMonthBestProductType;
+    }
+
+    public void setCurrentMonthBestProductType(String currentMonthBestProductType) {
+        this.currentMonthBestProductType = currentMonthBestProductType;
+    }
+
+    public String getCurrentMonthTopBedSize() {
+        return currentMonthTopBedSize;
+    }
+
+    public void setCurrentMonthTopBedSize(String currentMonthTopBedSize) {
+        this.currentMonthTopBedSize = currentMonthTopBedSize;
     }
 
     public List<LabelMetric> getByDistrict() {

@@ -24,6 +24,73 @@
 <div th:replace="~{fragments/nav :: main}"></div>
 
 <main class="container dashboard">
+    <section class="current-month-section">
+        <div class="section-head">
+            <div>
+                <h3>Current month analysis</h3>
+                <p class="hint">Separate tiles for each current-month detail.</p>
+            </div>
+        </div>
+        <div class="monthly-tile-grid current-month-grid">
+            <article class="card monthly-tile tile-metric">
+                <span class="kpi-label">Orders</span>
+                <strong class="tile-value" th:text="${dashboard.currentMonthOrders}">0</strong>
+                <small>Current month</small>
+            </article>
+            <article class="card monthly-tile tile-metric">
+                <span class="kpi-label">Items sold</span>
+                <strong class="tile-value" th:text="${dashboard.currentMonthItems}">0</strong>
+                <small>Current month</small>
+            </article>
+            <article class="card monthly-tile tile-metric">
+                <span class="kpi-label">Revenue (LKR)</span>
+                <strong class="tile-value" th:text="${#numbers.formatDecimal(dashboard.currentMonthRevenue, 0, 'COMMA', 0, 'POINT')}">0</strong>
+                <small>Current month</small>
+            </article>
+            <article class="card monthly-tile tile-metric">
+                <span class="kpi-label">Net profit (LKR)</span>
+                <strong class="tile-value" th:text="${#numbers.formatDecimal(dashboard.currentMonthNetProfit, 0, 'COMMA', 0, 'POINT')}">0</strong>
+                <small>Current month</small>
+            </article>
+            <article class="card monthly-tile tile-metric">
+                <span class="kpi-label">Gross profit (LKR)</span>
+                <strong class="tile-value" th:text="${#numbers.formatDecimal(dashboard.currentMonthGrossProfit, 0, 'COMMA', 0, 'POINT')}">0</strong>
+                <small>Current month</small>
+            </article>
+            <article class="card monthly-tile tile-metric">
+                <span class="kpi-label">COD total (LKR)</span>
+                <strong class="tile-value" th:text="${#numbers.formatDecimal(dashboard.currentMonthCodTotal, 0, 'COMMA', 0, 'POINT')}">0</strong>
+                <small>Current month</small>
+            </article>
+            <article class="card monthly-tile tile-metric">
+                <span class="kpi-label">Avg order (LKR)</span>
+                <strong class="tile-value" th:text="${#numbers.formatDecimal(dashboard.currentMonthAvgOrderValue, 0, 'COMMA', 0, 'POINT')}">0</strong>
+                <small>Current month</small>
+            </article>
+            <article class="card monthly-tile tile-metric">
+                <span class="kpi-label">Avg profit / order (LKR)</span>
+                <strong class="tile-value" th:text="${#numbers.formatDecimal(dashboard.currentMonthAvgProfitPerOrder, 0, 'COMMA', 0, 'POINT')}">0</strong>
+                <small>Current month</small>
+            </article>
+            <article class="card monthly-tile tile-text">
+                <span class="kpi-label">Top district</span>
+                <strong class="tile-value tile-text-value" th:text="${dashboard.currentMonthTopDistrict != null ? dashboard.currentMonthTopDistrict : '—'}">—</strong>
+            </article>
+            <article class="card monthly-tile tile-text">
+                <span class="kpi-label">Top city</span>
+                <strong class="tile-value tile-text-value" th:text="${dashboard.currentMonthTopCity != null ? dashboard.currentMonthTopCity : '—'}">—</strong>
+            </article>
+            <article class="card monthly-tile tile-text">
+                <span class="kpi-label">Best product type</span>
+                <strong class="tile-value tile-text-value" th:text="${dashboard.currentMonthBestProductType != null ? dashboard.currentMonthBestProductType : '—'}">—</strong>
+            </article>
+            <article class="card monthly-tile tile-text">
+                <span class="kpi-label">Top bed size</span>
+                <strong class="tile-value tile-text-value" th:text="${dashboard.currentMonthTopBedSize != null ? dashboard.currentMonthTopBedSize : '—'}">—</strong>
+            </article>
+        </div>
+    </section>
+
     <section class="card hero">
         <div class="row between wrap">
             <div>
@@ -32,63 +99,12 @@
                 <p class="hint" th:if="${periodDays == 0}">Showing all time</p>
                 <p class="hint">Revenue = COD value − delivery charge. Net profit stays separate.</p>
             </div>
-            <div class="current-month-summary">
-                <div class="kpi small">
-                    <span class="kpi-label">This month orders</span>
-                    <strong class="kpi-value" th:text="${dashboard.currentMonthOrders}">0</strong>
-                </div>
-                <div class="kpi small">
-                    <span class="kpi-label">This month items</span>
-                    <strong class="kpi-value" th:text="${dashboard.currentMonthItems}">0</strong>
-                </div>
-                <div class="kpi small">
-                    <span class="kpi-label">This month revenue (LKR)</span>
-                    <strong class="kpi-value" th:text="${#numbers.formatDecimal(dashboard.currentMonthRevenue, 0, 'COMMA', 0, 'POINT')}">0</strong>
-                </div>
-                <div class="kpi small">
-                    <span class="kpi-label">This month net (LKR)</span>
-                    <strong class="kpi-value" th:text="${#numbers.formatDecimal(dashboard.currentMonthNetProfit, 0, 'COMMA', 0, 'POINT')}">0</strong>
-                </div>
-            </div>
             <div class="period-filters">
                 <a th:href="@{/dashboard(days=7)}" th:classappend="${periodDays == 7} ? 'active' : ''">7 days</a>
                 <a th:href="@{/dashboard(days=30)}" th:classappend="${periodDays == 30} ? 'active' : ''">30 days</a>
                 <a th:href="@{/dashboard(days=90)}" th:classappend="${periodDays == 90} ? 'active' : ''">90 days</a>
                 <a th:href="@{/dashboard(days=0)}" th:classappend="${periodDays == 0} ? 'active' : ''">All time</a>
             </div>
-        </div>
-    </section>
-
-    <section class="card monthly-summary-section">
-        <div class="section-head">
-            <div>
-                <h3>Monthly analysis (all time)</h3>
-                <p class="hint">Tiles showing month-by-month performance across the entire history.</p>
-            </div>
-        </div>
-        <div class="monthly-tile-grid">
-            <article class="card monthly-tile" th:each="m : ${dashboard.monthlyAnalysis}">
-                <div class="monthly-tile-head">
-                    <strong th:text="${#temporals.format(m.month, 'yyyy-MM')}">2023-01</strong>
-                    <span class="badge">Month</span>
-                </div>
-                <div class="monthly-tile-stats">
-                    <div><span>Orders</span><strong th:text="${m.orderCount}">0</strong></div>
-                    <div><span>Items sold</span><strong th:text="${m.itemsSold}">0</strong></div>
-                    <div><span>Revenue</span><strong th:text="${#numbers.formatDecimal(m.revenue, 0, 'COMMA', 0, 'POINT')}">0</strong></div>
-                    <div><span>Net profit</span><strong th:text="${#numbers.formatDecimal(m.netProfit, 0, 'COMMA', 0, 'POINT')}">0</strong></div>
-                    <div><span>Gross profit</span><strong th:text="${#numbers.formatDecimal(m.grossProfit, 0, 'COMMA', 0, 'POINT')}">0</strong></div>
-                    <div><span>COD total</span><strong th:text="${#numbers.formatDecimal(m.codTotal, 0, 'COMMA', 0, 'POINT')}">0</strong></div>
-                    <div><span>Avg order</span><strong th:text="${#numbers.formatDecimal(m.avgOrderValue, 0, 'COMMA', 0, 'POINT')}">0</strong></div>
-                    <div><span>Avg profit / order</span><strong th:text="${#numbers.formatDecimal(m.avgProfitPerOrder, 0, 'COMMA', 0, 'POINT')}">0</strong></div>
-                </div>
-                <div class="monthly-tile-tags">
-                    <span><b>Top district:</b> <span th:text="${m.topDistrict != null ? m.topDistrict : '—'}">—</span></span>
-                    <span><b>Top city:</b> <span th:text="${m.topCity != null ? m.topCity : '—'}">—</span></span>
-                    <span><b>Best product:</b> <span th:text="${m.bestProductType != null ? m.bestProductType : '—'}">—</span></span>
-                    <span><b>Top bed size:</b> <span th:text="${m.topBedSize != null ? m.topBedSize : '—'}">—</span></span>
-                </div>
-            </article>
         </div>
     </section>
 
