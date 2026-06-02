@@ -59,6 +59,39 @@
         </div>
     </section>
 
+    <section class="card monthly-summary-section">
+        <div class="section-head">
+            <div>
+                <h3>Monthly analysis (all time)</h3>
+                <p class="hint">Tiles showing month-by-month performance across the entire history.</p>
+            </div>
+        </div>
+        <div class="monthly-tile-grid">
+            <article class="card monthly-tile" th:each="m : ${dashboard.monthlyAnalysis}">
+                <div class="monthly-tile-head">
+                    <strong th:text="${#temporals.format(m.month, 'yyyy-MM')}">2023-01</strong>
+                    <span class="badge">Month</span>
+                </div>
+                <div class="monthly-tile-stats">
+                    <div><span>Orders</span><strong th:text="${m.orderCount}">0</strong></div>
+                    <div><span>Items sold</span><strong th:text="${m.itemsSold}">0</strong></div>
+                    <div><span>Revenue</span><strong th:text="${#numbers.formatDecimal(m.revenue, 0, 'COMMA', 0, 'POINT')}">0</strong></div>
+                    <div><span>Net profit</span><strong th:text="${#numbers.formatDecimal(m.netProfit, 0, 'COMMA', 0, 'POINT')}">0</strong></div>
+                    <div><span>Gross profit</span><strong th:text="${#numbers.formatDecimal(m.grossProfit, 0, 'COMMA', 0, 'POINT')}">0</strong></div>
+                    <div><span>COD total</span><strong th:text="${#numbers.formatDecimal(m.codTotal, 0, 'COMMA', 0, 'POINT')}">0</strong></div>
+                    <div><span>Avg order</span><strong th:text="${#numbers.formatDecimal(m.avgOrderValue, 0, 'COMMA', 0, 'POINT')}">0</strong></div>
+                    <div><span>Avg profit / order</span><strong th:text="${#numbers.formatDecimal(m.avgProfitPerOrder, 0, 'COMMA', 0, 'POINT')}">0</strong></div>
+                </div>
+                <div class="monthly-tile-tags">
+                    <span><b>Top district:</b> <span th:text="${m.topDistrict != null ? m.topDistrict : '—'}">—</span></span>
+                    <span><b>Top city:</b> <span th:text="${m.topCity != null ? m.topCity : '—'}">—</span></span>
+                    <span><b>Best product:</b> <span th:text="${m.bestProductType != null ? m.bestProductType : '—'}">—</span></span>
+                    <span><b>Top bed size:</b> <span th:text="${m.topBedSize != null ? m.topBedSize : '—'}">—</span></span>
+                </div>
+            </article>
+        </div>
+    </section>
+
     <section class="kpi-grid" th:object="${dashboard}">
         <article class="kpi card">
             <span class="kpi-label">Orders</span>
@@ -161,52 +194,6 @@
             </div>
         </article>
 
-        <article class="card">
-            <div class="section-head">
-                <div>
-                    <h3>Monthly analysis (all time)</h3>
-                    <p class="hint">Per-month performance across the entire history with operational, financial, and top-category breakdowns.</p>
-                </div>
-            </div>
-            <div class="table-wrap">
-                <table class="data-table compact-table">
-                    <thead>
-                    <tr>
-                        <th>Month</th>
-                        <th>Orders</th>
-                        <th>Qty sold</th>
-                        <th>Revenue (LKR)</th>
-                        <th>Gross profit (LKR)</th>
-                        <th>Net profit (LKR)</th>
-                        <th>COD total (LKR)</th>
-                        <th>Avg order (LKR)</th>
-                        <th>Avg profit / order (LKR)</th>
-                        <th>Top district</th>
-                        <th>Top city</th>
-                        <th>Best product type</th>
-                        <th>Top bed size</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="m : ${dashboard.monthlyAnalysis}">
-                        <td th:text="${#temporals.format(m.month, 'yyyy-MM')}">2023-01</td>
-                        <td th:text="${m.orderCount}">0</td>
-                        <td th:text="${m.itemsSold}">0</td>
-                        <td th:text="${#numbers.formatDecimal(m.revenue, 0, 'COMMA', 0, 'POINT')}">0</td>
-                        <td th:text="${#numbers.formatDecimal(m.grossProfit, 0, 'COMMA', 0, 'POINT')}">0</td>
-                        <td th:text="${#numbers.formatDecimal(m.netProfit, 0, 'COMMA', 0, 'POINT')}">0</td>
-                        <td th:text="${#numbers.formatDecimal(m.codTotal, 0, 'COMMA', 0, 'POINT')}">0</td>
-                        <td th:text="${#numbers.formatDecimal(m.avgOrderValue, 0, 'COMMA', 0, 'POINT')}">0</td>
-                        <td th:text="${#numbers.formatDecimal(m.avgProfitPerOrder, 0, 'COMMA', 0, 'POINT')}">0</td>
-                        <td th:text="${m.topDistrict != null ? m.topDistrict : '—'}">—</td>
-                        <td th:text="${m.topCity != null ? m.topCity : '—'}">—</td>
-                        <td th:text="${m.bestProductType != null ? m.bestProductType : '—'}">—</td>
-                        <td th:text="${m.topBedSize != null ? m.topBedSize : '—'}">—</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </article>
         <article class="card">
             <h3>Recent orders</h3>
             <p class="hint" th:if="${#lists.isEmpty(dashboard.recentOrders)}">No orders in this period.</p>
