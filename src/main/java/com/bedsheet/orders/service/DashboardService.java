@@ -56,7 +56,8 @@ public class DashboardService {
         Long mItems = analyticsRepository.totalItems(monthFrom);
         view.setCurrentMonthItems(mItems == null ? 0L : mItems);
         view.setDailyTrend(mapDaily(analyticsRepository.dailyTrend(from)));
-        view.setMonthlyTrend(mapMonthly(analyticsRepository.monthlyTrend(from)));
+        // Always show monthly analysis for all time (ignore the period filter)
+        view.setMonthlyTrend(mapMonthly(analyticsRepository.monthlyTrend(null)));
         view.setByDistrict(mapLabels(analyticsRepository.byDistrict(from)));
         view.setByCity(mapLabels(analyticsRepository.byCity(from)).stream().limit(8).toList());
         view.setByBedsheetType(mapTypes(analyticsRepository.byBedsheetType(from)));
