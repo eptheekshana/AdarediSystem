@@ -18,6 +18,11 @@ public class DashboardView {
     private BigDecimal avgNetProfit = BigDecimal.ZERO;
     private List<DailyMetric> dailyTrend = List.of();
     private List<DailyMetric> monthlyTrend = List.of();
+    // Current month summary
+    private long currentMonthOrders;
+    private long currentMonthItems;
+    private BigDecimal currentMonthRevenue = BigDecimal.ZERO;
+    private BigDecimal currentMonthNetProfit = BigDecimal.ZERO;
     private List<LabelMetric> byDistrict = List.of();
     private List<LabelMetric> byCity = List.of();
     private List<ProductTypeMetric> byBedsheetType = List.of();
@@ -126,6 +131,38 @@ public class DashboardView {
 
     public void setMonthlyTrend(List<DailyMetric> monthlyTrend) {
         this.monthlyTrend = monthlyTrend;
+    }
+
+    public long getCurrentMonthOrders() {
+        return currentMonthOrders;
+    }
+
+    public void setCurrentMonthOrders(long currentMonthOrders) {
+        this.currentMonthOrders = currentMonthOrders;
+    }
+
+    public long getCurrentMonthItems() {
+        return currentMonthItems;
+    }
+
+    public void setCurrentMonthItems(long currentMonthItems) {
+        this.currentMonthItems = currentMonthItems;
+    }
+
+    public BigDecimal getCurrentMonthRevenue() {
+        return currentMonthRevenue;
+    }
+
+    public void setCurrentMonthRevenue(BigDecimal currentMonthRevenue) {
+        this.currentMonthRevenue = currentMonthRevenue;
+    }
+
+    public BigDecimal getCurrentMonthNetProfit() {
+        return currentMonthNetProfit;
+    }
+
+    public void setCurrentMonthNetProfit(BigDecimal currentMonthNetProfit) {
+        this.currentMonthNetProfit = currentMonthNetProfit;
     }
 
     public List<LabelMetric> getByDistrict() {

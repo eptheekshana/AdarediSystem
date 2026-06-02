@@ -36,6 +36,25 @@ public class DashboardService {
         DashboardView view = new DashboardView();
         view.setPeriodDays(periodDays);
         applySummary(view, from);
+        // Current month summary
+        LocalDate monthStart = LocalDate.now().withDayOfMonth(1);
+        LocalDateTime monthFrom = monthStart.atStartOfDay();
+        List<Object[]> monthRows = analyticsRepository.summarizeOrders(monthFrom);
+        if (!monthRows.isEmpty()) {
+            Object[] mrow = monthRows.get(0);
+            long mOrders = ((Number) mrow[0]).longValue();
+            java.math.BigDecimal mRevenue = toBigDecimal(mrow[1]);
+            java.math.BigDecimal mNet = toBigDecimal(mrow[3]);
+            view.setCurrentMonthOrders(mOrders);
+            view.setCurrentMonthRevenue(mRevenue);
+            view.setCurrentMonthNetProfit(mNet);
+        } else {
+            view.setCurrentMonthOrders(0L);
+            view.setCurrentMonthRevenue(java.math.BigDecimal.ZERO);
+            view.setCurrentMonthNetProfit(java.math.BigDecimal.ZERO);
+        }
+        Long mItems = analyticsRepository.totalItems(monthFrom);
+        view.setCurrentMonthItems(mItems == null ? 0L : mItems);
         view.setDailyTrend(mapDaily(analyticsRepository.dailyTrend(from)));
         view.setMonthlyTrend(mapMonthly(analyticsRepository.monthlyTrend(from)));
         view.setByDistrict(mapLabels(analyticsRepository.byDistrict(from)));

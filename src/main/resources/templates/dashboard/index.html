@@ -32,6 +32,24 @@
                 <p class="hint" th:if="${periodDays == 0}">Showing all time</p>
                 <p class="hint">Revenue = COD value − delivery charge. Net profit stays separate.</p>
             </div>
+            <div class="current-month-summary">
+                <div class="kpi small">
+                    <span class="kpi-label">This month orders</span>
+                    <strong class="kpi-value" th:text="${dashboard.currentMonthOrders}">0</strong>
+                </div>
+                <div class="kpi small">
+                    <span class="kpi-label">This month items</span>
+                    <strong class="kpi-value" th:text="${dashboard.currentMonthItems}">0</strong>
+                </div>
+                <div class="kpi small">
+                    <span class="kpi-label">This month revenue (LKR)</span>
+                    <strong class="kpi-value" th:text="${#numbers.formatDecimal(dashboard.currentMonthRevenue, 0, 'COMMA', 0, 'POINT')}">0</strong>
+                </div>
+                <div class="kpi small">
+                    <span class="kpi-label">This month net (LKR)</span>
+                    <strong class="kpi-value" th:text="${#numbers.formatDecimal(dashboard.currentMonthNetProfit, 0, 'COMMA', 0, 'POINT')}">0</strong>
+                </div>
+            </div>
             <div class="period-filters">
                 <a th:href="@{/dashboard(days=7)}" th:classappend="${periodDays == 7} ? 'active' : ''">7 days</a>
                 <a th:href="@{/dashboard(days=30)}" th:classappend="${periodDays == 30} ? 'active' : ''">30 days</a>
