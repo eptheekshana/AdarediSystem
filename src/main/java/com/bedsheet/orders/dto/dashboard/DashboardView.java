@@ -18,6 +18,7 @@ public class DashboardView {
     private BigDecimal avgNetProfit = BigDecimal.ZERO;
     private List<DailyMetric> dailyTrend = List.of();
     private List<DailyMetric> monthlyTrend = List.of();
+    private List<MonthlyAnalysisMetric> monthlyAnalysis = List.of();
     // Current month summary
     private long currentMonthOrders;
     private long currentMonthItems;
@@ -131,6 +132,14 @@ public class DashboardView {
 
     public void setMonthlyTrend(List<DailyMetric> monthlyTrend) {
         this.monthlyTrend = monthlyTrend;
+    }
+
+    public List<MonthlyAnalysisMetric> getMonthlyAnalysis() {
+        return monthlyAnalysis;
+    }
+
+    public void setMonthlyAnalysis(List<MonthlyAnalysisMetric> monthlyAnalysis) {
+        this.monthlyAnalysis = monthlyAnalysis;
     }
 
     public long getCurrentMonthOrders() {

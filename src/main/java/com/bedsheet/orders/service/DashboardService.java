@@ -3,6 +3,7 @@ package com.bedsheet.orders.service;
 import com.bedsheet.orders.dto.dashboard.DailyMetric;
 import com.bedsheet.orders.dto.dashboard.DashboardView;
 import com.bedsheet.orders.dto.dashboard.LabelMetric;
+import com.bedsheet.orders.dto.dashboard.MonthlyAnalysisMetric;
 import com.bedsheet.orders.dto.dashboard.ProductTypeMetric;
 import com.bedsheet.orders.dto.dashboard.RecentOrderRow;
 import com.bedsheet.orders.repository.AnalyticsRepository;
@@ -54,10 +55,11 @@ public class DashboardService {
             view.setCurrentMonthNetProfit(java.math.BigDecimal.ZERO);
         }
         Long mItems = analyticsRepository.totalItems(monthFrom);
-        view.setCurrentMonthItems(mItems == null ? 0L : mItems);
+        view.setCurrentMonthItems(mItems == null ? 0L : mItems.longValue());
         view.setDailyTrend(mapDaily(analyticsRepository.dailyTrend(from)));
         // Always show monthly analysis for all time (ignore the period filter)
         view.setMonthlyTrend(mapMonthly(analyticsRepository.monthlyTrend(null)));
+        view.setMonthlyAnalysis(buildMonthlyAnalysis());
         view.setByDistrict(mapLabels(analyticsRepository.byDistrict(from)));
         view.setByCity(mapLabels(analyticsRepository.byCity(from)).stream().limit(8).toList());
         view.setByBedsheetType(mapTypes(analyticsRepository.byBedsheetType(from)));
@@ -87,7 +89,8 @@ public class DashboardService {
         view.setTotalDiscount(discount);
         view.setTotalDeliveryCharge(delivery);
         view.setTotalCod(cod);
-        view.setTotalItems(analyticsRepository.totalItems(from));
+        Long totalItems = analyticsRepository.totalItems(from);
+        view.setTotalItems(totalItems == null ? 0L : totalItems.longValue());
 
         if (orders > 0) {
             view.setAvgOrderValue(revenue.divide(BigDecimal.valueOf(orders), 2, RoundingMode.HALF_UP));
@@ -122,6 +125,75 @@ public class DashboardService {
             metrics.add(new DailyMetric(date, orders, revenue, net, items));
         }
         return metrics;
+    }
+
+    private List<MonthlyAnalysisMetric> buildMonthlyAnalysis() {
+        List<Object[]> summaryRows = analyticsRepository.monthlySummary(null);
+        java.util.LinkedHashMap<String, MonthlyAnalysisMetric> byMonth = new java.util.LinkedHashMap<>();
+
+        for (Object[] row : summaryRows) {
+            String key = monthKey(row[0], row[1]);
+            MonthlyAnalysisMetric metric = new MonthlyAnalysisMetric();
+            metric.setMonth(toMonthDate(row[0], row[1]));
+            metric.setOrderCount(((Number) row[2]).longValue());
+            metric.setItemsSold(row[3] == null ? 0L : ((Number) row[3]).longValue());
+            metric.setRevenue(toBigDecimal(row[4]));
+            metric.setGrossProfit(toBigDecimal(row[5]));
+            metric.setNetProfit(toBigDecimal(row[6]));
+            metric.setCodTotal(toBigDecimal(row[7]));
+            byMonth.put(key, metric);
+        }
+
+        applyTopDistricts(byMonth, analyticsRepository.monthlyByDistrict(null));
+        applyTopCities(byMonth, analyticsRepository.monthlyByCity(null));
+        applyBestProductTypes(byMonth, analyticsRepository.monthlyByBedsheetType(null));
+        applyTopBedSizes(byMonth, analyticsRepository.monthlyByBedSize(null));
+
+        return new ArrayList<>(byMonth.values());
+    }
+
+    private static void applyTopDistricts(java.util.Map<String, MonthlyAnalysisMetric> byMonth, List<Object[]> rows) {
+        for (Object[] row : rows) {
+            MonthlyAnalysisMetric metric = byMonth.get(monthKey(row[0], row[1]));
+            if (metric != null && metric.getTopDistrict() == null) {
+                metric.setTopDistrict(String.valueOf(row[2]));
+            }
+        }
+    }
+
+    private static void applyTopCities(java.util.Map<String, MonthlyAnalysisMetric> byMonth, List<Object[]> rows) {
+        for (Object[] row : rows) {
+            MonthlyAnalysisMetric metric = byMonth.get(monthKey(row[0], row[1]));
+            if (metric != null && metric.getTopCity() == null) {
+                metric.setTopCity(String.valueOf(row[2]));
+            }
+        }
+    }
+
+    private static void applyBestProductTypes(java.util.Map<String, MonthlyAnalysisMetric> byMonth, List<Object[]> rows) {
+        for (Object[] row : rows) {
+            MonthlyAnalysisMetric metric = byMonth.get(monthKey(row[0], row[1]));
+            if (metric != null && metric.getBestProductType() == null) {
+                metric.setBestProductType(String.valueOf(row[2]));
+            }
+        }
+    }
+
+    private static void applyTopBedSizes(java.util.Map<String, MonthlyAnalysisMetric> byMonth, List<Object[]> rows) {
+        for (Object[] row : rows) {
+            MonthlyAnalysisMetric metric = byMonth.get(monthKey(row[0], row[1]));
+            if (metric != null && metric.getTopBedSize() == null) {
+                metric.setTopBedSize(String.valueOf(row[2]).replace('_', ' '));
+            }
+        }
+    }
+
+    private static String monthKey(Object yearValue, Object monthValue) {
+        return ((Number) yearValue).intValue() + "-" + ((Number) monthValue).intValue();
+    }
+
+    private static LocalDate toMonthDate(Object yearValue, Object monthValue) {
+        return LocalDate.of(((Number) yearValue).intValue(), ((Number) monthValue).intValue(), 1);
     }
 
     private List<LabelMetric> mapLabels(List<Object[]> rows) {
