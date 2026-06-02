@@ -581,6 +581,14 @@ select:focus {
     margin: 1rem 0;
 }
 
+.current-month-section .section-head {
+    margin-bottom: 0.9rem;
+}
+
+.current-month-section .section-head h3 {
+    font-size: 1.25rem;
+}
+
 .monthly-tile-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -592,32 +600,77 @@ select:focus {
     flex-wrap: nowrap;
     overflow-x: auto;
     gap: 0.9rem;
-    padding-bottom: 0.25rem;
+    padding: 0.25rem 0 0.6rem;
     scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+}
+
+.current-month-grid::-webkit-scrollbar {
+    height: 10px;
+}
+
+.current-month-grid::-webkit-scrollbar-thumb {
+    background: rgba(var(--accent-rgb), 0.22);
+    border-radius: 999px;
+}
+
+.current-month-grid::-webkit-scrollbar-track {
+    background: transparent;
 }
 
 .monthly-tile {
-    padding: 1rem;
+    padding: 1rem 1rem 0.95rem;
     display: flex;
     flex-direction: column;
     gap: 0.85rem;
 }
 
 .current-month-grid .monthly-tile {
-    flex: 0 0 220px;
+    flex: 0 0 230px;
     scroll-snap-align: start;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(var(--accent-rgb), 0.14);
+    background:
+        linear-gradient(180deg, rgba(var(--accent-rgb), 0.10), transparent 34%),
+        var(--surface);
+}
+
+.current-month-grid .monthly-tile::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+}
+
+.current-month-grid .monthly-tile:nth-child(4n+1)::before {
+    background: linear-gradient(90deg, var(--accent), #2dd4bf);
+}
+
+.current-month-grid .monthly-tile:nth-child(4n+2)::before {
+    background: linear-gradient(90deg, var(--accent-2), #7c3aed);
+}
+
+.current-month-grid .monthly-tile:nth-child(4n+3)::before {
+    background: linear-gradient(90deg, var(--warning), #f97316);
+}
+
+.current-month-grid .monthly-tile:nth-child(4n+4)::before {
+    background: linear-gradient(90deg, #14b8a6, #2563eb);
 }
 
 .tile-metric {
-    min-height: 120px;
+    min-height: 130px;
     justify-content: space-between;
 }
 
 .tile-metric .tile-value,
 .tile-text-value {
     display: block;
-    margin-top: 0.25rem;
-    font-size: 1.35rem;
+    margin-top: 0.15rem;
+    font-size: 1.45rem;
     font-weight: 800;
     color: var(--text);
     line-height: 1.15;
@@ -632,6 +685,17 @@ select:focus {
     justify-content: center;
 }
 
+.tile-text .tile-text-value {
+    font-size: 1.18rem;
+    word-break: break-word;
+}
+
+.current-month-grid .kpi-label {
+    color: var(--accent);
+    font-size: 0.75rem;
+    font-weight: 800;
+}
+
 .monthly-tile-head {
     display: flex;
     align-items: center;
@@ -642,6 +706,12 @@ select:focus {
 .monthly-tile-head strong {
     font-size: 1.05rem;
     letter-spacing: 0.02em;
+}
+
+.current-month-grid .badge {
+    background: rgba(var(--accent-rgb), 0.14);
+    color: var(--accent);
+    border-color: rgba(var(--accent-rgb), 0.20);
 }
 
 .monthly-tile-stats {
