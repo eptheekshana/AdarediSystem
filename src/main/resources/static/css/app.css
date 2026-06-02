@@ -249,6 +249,12 @@ a:hover {
     max-width: 1320px;
 }
 
+.dashboard-modern {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
 .layout {
     display: grid;
     grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
@@ -270,6 +276,20 @@ a:hover {
     box-shadow: var(--shadow);
     backdrop-filter: blur(10px);
     transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.dashboard-modern .card {
+    position: relative;
+    overflow: hidden;
+}
+
+.dashboard-modern .card::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.35), transparent);
+    pointer-events: none;
 }
 
 .card:hover {
@@ -549,12 +569,28 @@ select:focus {
     margin: 1rem 0;
 }
 
+.modern-kpi-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+}
+
 .kpi {
     padding: 1rem;
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
 }
+
+.kpi.card {
+    background:
+        linear-gradient(180deg, rgba(var(--accent-rgb), 0.06), transparent 42%),
+        var(--surface);
+    border-left: 4px solid transparent;
+}
+
+.kpi.card:nth-child(4n + 1) { border-left-color: var(--accent); }
+.kpi.card:nth-child(4n + 2) { border-left-color: var(--accent-2); }
+.kpi.card:nth-child(4n + 3) { border-left-color: var(--warning); }
+.kpi.card:nth-child(4n + 4) { border-left-color: var(--success); }
 
 .kpi-label {
     font-size: 0.84rem;
@@ -729,6 +765,10 @@ select:focus {
     gap: 0.75rem;
 }
 
+.monthly-tile-head .kpi-label {
+    line-height: 1.2;
+}
+
 /* Icon shown at the left of each current-month tile */
 .tile-icon {
     display: inline-block;
@@ -765,6 +805,116 @@ select:focus {
 .monthly-tile-head strong {
     font-size: 1.05rem;
     letter-spacing: 0.02em;
+}
+
+.monthly-tile-grid .tile-metric,
+.monthly-tile-grid .tile-text {
+    background:
+        radial-gradient(circle at top right, rgba(var(--accent-2-rgb), 0.10), transparent 42%),
+        linear-gradient(180deg, rgba(var(--accent-rgb), 0.08), transparent 34%),
+        var(--surface);
+}
+
+.monthly-tile-grid .tile-text::after,
+.monthly-tile-grid .tile-metric::after {
+    inset: auto 0 0 0;
+}
+
+.monthly-tile-grid .tile-metric:hover,
+.monthly-tile-grid .tile-text:hover {
+    transform: translateY(-2px);
+}
+
+.dashboard-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+    gap: 1rem;
+    align-items: stretch;
+    padding: 1.35rem;
+    background:
+        radial-gradient(circle at top left, rgba(var(--accent-rgb), 0.16), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(var(--accent-2-rgb), 0.16), transparent 34%),
+        var(--surface);
+}
+
+.hero-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    padding: 0.2rem;
+}
+
+.hero-eyebrow {
+    display: inline-flex;
+    align-self: flex-start;
+    padding: 0.34rem 0.72rem;
+    border-radius: 999px;
+    background: rgba(var(--accent-rgb), 0.12);
+    color: var(--accent);
+    border: 1px solid rgba(var(--accent-rgb), 0.16);
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.hero-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.35rem;
+}
+
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.44rem 0.74rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--panel-bg-strong);
+    color: var(--text);
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.hero-side {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.hero-filters {
+    justify-content: flex-end;
+}
+
+.hero-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.hero-metric {
+    padding: 0.9rem 1rem;
+    border-radius: 16px;
+    border: 1px solid rgba(var(--accent-rgb), 0.12);
+    background:
+        linear-gradient(180deg, rgba(var(--accent-rgb), 0.06), transparent 80%),
+        var(--panel-bg-strong);
+    box-shadow: var(--shadow-soft);
+}
+
+.hero-metric strong {
+    display: block;
+    margin-top: 0.28rem;
+    font-size: 1.45rem;
+    line-height: 1.12;
+    font-weight: 800;
+}
+
+.hero h2 {
+    font-size: clamp(1.8rem, 3vw, 2.55rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
 }
 
 .monthly-tile-grid .badge {
@@ -814,11 +964,18 @@ select:focus {
     margin: 1rem 0;
 }
 
+.modern-insight-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 .insight-card {
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
     min-height: 140px;
+    background:
+        radial-gradient(circle at top right, rgba(var(--accent-2-rgb), 0.08), transparent 36%),
+        var(--surface);
 }
 
 .insight-value {
@@ -858,10 +1015,30 @@ select:focus {
     margin-top: 1rem;
 }
 
+.modern-analytics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .dashboard-tables {
     display: grid;
     grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
     gap: 1rem;
+}
+
+.modern-dashboard-grid {
+    grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+}
+
+.table-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.table-card .table-wrap {
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    background: var(--surface-solid);
 }
 
 .dashboard-tables > .card:first-child {
@@ -998,6 +1175,10 @@ select:focus {
     overflow: hidden;
 }
 
+.hero.dashboard-hero {
+    overflow: hidden;
+}
+
 .hero::after {
     content: "";
     position: absolute;
@@ -1097,8 +1278,16 @@ select:focus {
         grid-template-columns: 1fr;
     }
 
+    .dashboard-hero {
+        grid-template-columns: 1fr;
+    }
+
     .insight-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .hero-filters {
+        justify-content: flex-start;
     }
 }
 
@@ -1138,7 +1327,8 @@ select:focus {
     .layout,
     .dashboard-tables,
     .analytics-panels,
-    .insight-grid {
+    .insight-grid,
+    .dashboard-hero {
         grid-template-columns: 1fr;
     }
 
@@ -1158,6 +1348,10 @@ select:focus {
     }
 
     .kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .hero-metrics {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
@@ -1191,6 +1385,14 @@ select:focus {
     .kpi-grid,
     .insight-grid {
         grid-template-columns: 1fr;
+    }
+
+    .hero-metrics {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-hero {
+        padding: 1rem;
     }
 
     .card h2,

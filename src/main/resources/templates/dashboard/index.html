@@ -23,12 +23,12 @@
 <body>
 <div th:replace="~{fragments/nav :: main}"></div>
 
-<main class="container dashboard">
+<main class="container dashboard dashboard-modern">
     <section class="current-month-section">
         <div class="section-head">
             <div>
                 <h3>Current month analysis</h3>
-                <p class="hint">Separate tiles for each current-month detail.</p>
+                <p class="hint">A fast-glance view of the live operating metrics driving this month.</p>
             </div>
         </div>
         <div class="monthly-tile-grid two-row-tiles">
@@ -189,24 +189,48 @@
         </div>
     </section>
 
-    <section class="card hero">
-        <div class="row between wrap">
-            <div>
-                <h2>ADAREDI.COM Analytics</h2>
-                <p class="hint" th:if="${periodDays > 0}" th:text="'Showing last ' + ${periodDays} + ' days'">Period</p>
-                <p class="hint" th:if="${periodDays == 0}">Showing all time</p>
-                <p class="hint">Revenue = COD value − delivery charge. Net profit stays separate.</p>
+    <section class="card hero dashboard-hero">
+        <div class="hero-copy">
+            <span class="hero-eyebrow">Operations overview</span>
+            <h2>ADAREDI.COM Analytics</h2>
+            <p class="hint" th:if="${periodDays > 0}" th:text="'Showing last ' + ${periodDays} + ' days'">Period</p>
+            <p class="hint" th:if="${periodDays == 0}">Showing all time</p>
+            <p class="hint">Revenue = COD value − delivery charge. Net profit stays separate.</p>
+            <div class="hero-badges">
+                <span class="hero-badge">Live data</span>
+                <span class="hero-badge">Profit-first view</span>
+                <span class="hero-badge">Responsive layout</span>
             </div>
-            <div class="period-filters">
+        </div>
+        <div class="hero-side">
+            <div class="period-filters hero-filters">
                 <a th:href="@{/dashboard(days=7)}" th:classappend="${periodDays == 7} ? 'active' : ''">7 days</a>
                 <a th:href="@{/dashboard(days=30)}" th:classappend="${periodDays == 30} ? 'active' : ''">30 days</a>
                 <a th:href="@{/dashboard(days=90)}" th:classappend="${periodDays == 90} ? 'active' : ''">90 days</a>
                 <a th:href="@{/dashboard(days=0)}" th:classappend="${periodDays == 0} ? 'active' : ''">All time</a>
             </div>
+            <div class="hero-metrics">
+                <article class="hero-metric">
+                    <span class="kpi-label">Orders</span>
+                    <strong th:text="${dashboard.totalOrders}">0</strong>
+                </article>
+                <article class="hero-metric">
+                    <span class="kpi-label">Revenue (LKR)</span>
+                    <strong th:text="${#numbers.formatDecimal(dashboard.totalRevenue, 0, 'COMMA', 0, 'POINT')}">0</strong>
+                </article>
+                <article class="hero-metric">
+                    <span class="kpi-label">Net profit (LKR)</span>
+                    <strong th:text="${#numbers.formatDecimal(dashboard.netProfit, 0, 'COMMA', 0, 'POINT')}">0</strong>
+                </article>
+                <article class="hero-metric">
+                    <span class="kpi-label">Avg order (LKR)</span>
+                    <strong th:text="${#numbers.formatDecimal(dashboard.avgOrderValue, 0, 'COMMA', 0, 'POINT')}">0</strong>
+                </article>
+            </div>
         </div>
     </section>
 
-    <section class="kpi-grid" th:object="${dashboard}">
+    <section class="kpi-grid modern-kpi-grid" th:object="${dashboard}">
         <article class="kpi card">
             <span class="kpi-label">Orders</span>
             <strong class="kpi-value" th:text="*{totalOrders}">0</strong>
@@ -245,7 +269,7 @@
         </article>
     </section>
 
-    <section class="insight-grid">
+    <section class="insight-grid modern-insight-grid">
         <article class="card insight-card">
             <span class="kpi-label">Top district</span>
             <strong class="insight-value" th:text="${#lists.isEmpty(dashboard.byDistrict) ? '—' : dashboard.byDistrict[0].label}">—</strong>
@@ -272,8 +296,8 @@
         </article>
     </section>
 
-    <section class="dashboard-tables">
-        <article class="card">
+    <section class="dashboard-tables modern-dashboard-grid">
+        <article class="card table-card">
             <div class="section-head">
                 <div>
                     <h3>Daily analysis</h3>
@@ -308,7 +332,7 @@
             </div>
         </article>
 
-        <article class="card">
+        <article class="card table-card">
             <h3>Recent orders</h3>
             <p class="hint" th:if="${#lists.isEmpty(dashboard.recentOrders)}">No orders in this period.</p>
             <div class="table-wrap" th:if="${!#lists.isEmpty(dashboard.recentOrders)}">
@@ -340,8 +364,8 @@
         </article>
     </section>
 
-    <section class="analytics-panels">
-        <article class="card">
+    <section class="analytics-panels modern-analytics-grid">
+        <article class="card table-card">
             <h3>Top districts by profit</h3>
             <p class="hint" th:if="${#lists.isEmpty(dashboard.byDistrict)}">No data yet.</p>
             <div class="table-wrap" th:if="${!#lists.isEmpty(dashboard.byDistrict)}">
@@ -366,7 +390,7 @@
             </div>
         </article>
 
-        <article class="card">
+        <article class="card table-card">
             <h3>Top cities by profit</h3>
             <p class="hint" th:if="${#lists.isEmpty(dashboard.byCity)}">No data yet.</p>
             <div class="table-wrap" th:if="${!#lists.isEmpty(dashboard.byCity)}">
@@ -391,7 +415,7 @@
             </div>
         </article>
 
-        <article class="card">
+        <article class="card table-card">
             <h3>Product mix</h3>
             <p class="hint" th:if="${#lists.isEmpty(dashboard.byBedsheetType)}">No data yet.</p>
             <div class="table-wrap" th:if="${!#lists.isEmpty(dashboard.byBedsheetType)}">
@@ -414,7 +438,7 @@
             </div>
         </article>
 
-        <article class="card">
+        <article class="card table-card">
             <h3>Units by bed size</h3>
             <p class="hint" th:if="${#lists.isEmpty(dashboard.byBedSize)}">No data yet.</p>
             <div class="table-wrap" th:if="${!#lists.isEmpty(dashboard.byBedSize)}">
