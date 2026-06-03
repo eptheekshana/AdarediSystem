@@ -35,6 +35,9 @@
             </div>
             <div class="row wrap">
                 <a class="btn secondary" th:href="@{/orders/{id}/edit(id=${order.id})}">Edit order</a>
+                <form method="post" th:action="@{/orders/{id}/delete(id=${order.id})}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this order? This action cannot be undone.');">
+                    <button type="submit" class="btn subtle" style="color: var(--danger);">Delete order</button>
+                </form>
                 <a class="btn subtle" th:href="@{/orders}">Back to orders</a>
             </div>
         </div>

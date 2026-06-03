@@ -11,6 +11,7 @@ import com.bedsheet.orders.model.CurfoxSyncStatus;
 import com.bedsheet.orders.model.CustomerOrder;
 import com.bedsheet.orders.model.OrderItem;
 import com.bedsheet.orders.service.DuplicateWaybillException;
+import com.bedsheet.orders.service.OrderNotFoundException;
 import com.bedsheet.orders.service.OrderService;
 import com.bedsheet.orders.service.PricingService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -164,6 +165,21 @@ public class OrderPageController {
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
             return "redirect:/orders/" + id;
+        }
+    }
+
+    @PostMapping("/orders/{id}/delete")
+    public String deleteOrder(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            CustomerOrder order = orderService.findById(id);
+            String waybillNo = order.getWaybillNo();
+            orderService.deleteById(id);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Order '" + waybillNo + "' has been deleted successfully.");
+            return "redirect:/orders";
+        } catch (OrderNotFoundException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            return "redirect:/orders";
         }
     }
 
