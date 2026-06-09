@@ -12,7 +12,9 @@ CREATE TABLE IF NOT EXISTS orders (
   delivery_charge DECIMAL(15,2) DEFAULT 0,
   gross_profit DECIMAL(15,2) DEFAULT 0,
   net_profit DECIMAL(15,2) DEFAULT 0,
-  discount DECIMAL(15,2) DEFAULT 0
+  discount DECIMAL(15,2) DEFAULT 0,
+  total_selling_price DECIMAL(15,2) DEFAULT 0,
+  payment_method VARCHAR(20) DEFAULT 'CASH_ON_DELIVERY'
 );
 
 CREATE TABLE IF NOT EXISTS order_items (

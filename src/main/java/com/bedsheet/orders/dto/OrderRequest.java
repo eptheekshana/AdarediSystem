@@ -1,5 +1,6 @@
 package com.bedsheet.orders.dto;
 
+import com.bedsheet.orders.model.PaymentMethod;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -44,6 +45,8 @@ public class OrderRequest {
     private BigDecimal discount = BigDecimal.ZERO;
 
     private boolean pushToCurfox = true;
+
+    private PaymentMethod paymentMethod = PaymentMethod.CASH_ON_DELIVERY;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime createdAt;
@@ -146,6 +149,14 @@ public class OrderRequest {
 
     public void setPushToCurfox(boolean pushToCurfox) {
         this.pushToCurfox = pushToCurfox;
+    }
+
+    public PaymentMethod getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(PaymentMethod paymentMethod) {
+        this.paymentMethod = paymentMethod;
     }
 
 

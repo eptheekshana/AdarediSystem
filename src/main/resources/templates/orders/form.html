@@ -82,6 +82,16 @@
                     <label>Discount (LKR)
                         <input type="number" step="0.01" min="0" th:field="*{discount}" id="discountInput">
                     </label>
+                    <label>Payment method *
+                        <select th:field="*{paymentMethod}" required>
+                            <option th:each="method : ${T(com.bedsheet.orders.model.PaymentMethod).values()}"
+                                    th:value="${method}"
+                                    th:selected="${method.name() == 'CASH_ON_DELIVERY'}"
+                                    th:text="${method.displayName + (method.profitDeductionPercent != 0 ? ' (' + method.profitDeductionPercent + '% deduction)' : ' (No deduction)')}">
+                            </option>
+                        </select>
+                        <span class="hint">Select payment method. Some methods deduct a percentage from profit based on total value (product prices + delivery charge).</span>
+                    </label>
                 </div>
             </fieldset>
 

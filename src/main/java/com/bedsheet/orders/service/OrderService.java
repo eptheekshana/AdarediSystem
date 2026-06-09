@@ -7,6 +7,7 @@ import com.bedsheet.orders.dto.OrderRequest;
 import com.bedsheet.orders.model.CurfoxSyncStatus;
 import com.bedsheet.orders.model.CustomerOrder;
 import com.bedsheet.orders.model.OrderItem;
+import com.bedsheet.orders.model.PaymentMethod;
 import com.bedsheet.orders.repository.OrderRepository;
 import java.math.BigDecimal;
 import java.util.List;
@@ -116,6 +117,7 @@ public class OrderService {
         order.setDeliveryCharge(zeroIfNull(request.getDeliveryCharge()));
         order.setCodValue(zeroIfNull(request.getCodValue()));
         order.setDiscount(zeroIfNull(request.getDiscount()));
+        order.setPaymentMethod(request.getPaymentMethod() != null ? request.getPaymentMethod() : PaymentMethod.CASH_ON_DELIVERY);
     }
 
     private OrderItem buildItem(OrderItemRequest request) {
@@ -157,7 +159,10 @@ public class OrderService {
             deliveryDeduction = BigDecimal.ZERO;
         }
 
-        BigDecimal netProfit = grossProfit.subtract(discount).subtract(deliveryDeduction);
+        // Calculate payment method deduction
+        BigDecimal paymentMethodDeduction = calculatePaymentMethodDeduction(order, totalSelling, deliveryCharge);
+
+        BigDecimal netProfit = grossProfit.subtract(discount).subtract(deliveryDeduction).subtract(paymentMethodDeduction);
         if (netProfit.compareTo(BigDecimal.ZERO) < 0) {
             netProfit = BigDecimal.ZERO;
         }
@@ -165,6 +170,19 @@ public class OrderService {
         order.setTotalSellingPrice(totalSelling);
         order.setGrossProfit(grossProfit);
         order.setNetProfit(netProfit);
+    }
+
+    private BigDecimal calculatePaymentMethodDeduction(CustomerOrder order, BigDecimal totalSelling, BigDecimal deliveryCharge) {
+        PaymentMethod paymentMethod = order.getPaymentMethod();
+        if (paymentMethod == null || paymentMethod == PaymentMethod.CASH_ON_DELIVERY || paymentMethod == PaymentMethod.BANK_TRANSFER) {
+            return BigDecimal.ZERO;
+        }
+
+        // Total value = product prices + delivery charge
+        BigDecimal totalValue = totalSelling.add(deliveryCharge);
+        double deductionPercent = paymentMethod.getProfitDeductionPercent();
+        BigDecimal deduction = totalValue.multiply(BigDecimal.valueOf(deductionPercent)).divide(BigDecimal.valueOf(100), 2, java.math.RoundingMode.HALF_UP);
+        return deduction;
     }
 
     private static void resetCurfoxState(CustomerOrder order) {

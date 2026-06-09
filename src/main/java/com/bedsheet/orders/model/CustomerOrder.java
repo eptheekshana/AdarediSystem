@@ -71,6 +71,10 @@ public class CustomerOrder {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
+    private PaymentMethod paymentMethod = PaymentMethod.CASH_ON_DELIVERY;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
     private CurfoxSyncStatus curfoxSyncStatus = CurfoxSyncStatus.NOT_SYNCED;
 
     @Column
@@ -212,6 +216,14 @@ public class CustomerOrder {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public PaymentMethod getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(PaymentMethod paymentMethod) {
+        this.paymentMethod = paymentMethod;
     }
 
     public CurfoxSyncStatus getCurfoxSyncStatus() {

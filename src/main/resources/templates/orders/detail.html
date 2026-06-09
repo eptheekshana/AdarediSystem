@@ -53,6 +53,11 @@
             <p><strong>Delivery charge:</strong> LKR <span th:text="*{deliveryCharge}"></span></p>
             <p><strong>COD value:</strong> LKR <span th:text="*{codValue}"></span></p>
             <p><strong>Discount:</strong> LKR <span th:text="*{discount}"></span></p>
+            <p><strong>Payment method:</strong>
+                <span th:text="*{paymentMethod != null ? paymentMethod.displayName : '—'}"></span>
+                <span th:if="*{paymentMethod != null and paymentMethod.profitDeductionPercent != 0}" class="badge subtle"
+                      th:text="*{paymentMethod.profitDeductionPercent} + '% deduction'"></span>
+            </p>
         </div>
 
         <div th:if="${curfoxEnabled}" class="card subtle curfox-panel">
@@ -168,7 +173,11 @@
         <div class="summary card subtle">
             <p>Total selling: <strong th:text="'LKR ' + *{totalSellingPrice}"></strong></p>
             <p>Gross profit: <strong th:text="'LKR ' + *{grossProfit}"></strong></p>
-            <p>Net profit (after discount): <strong th:text="'LKR ' + *{netProfit}"></strong></p>
+            <p th:if="*{paymentMethod != null and paymentMethod.profitDeductionPercent != 0}"
+               class="hint" th:text="'Net profit after discount and payment method (' + *{paymentMethod.profitDeductionPercent} + '% deduction): '"></p>
+            <p th:unless="*{paymentMethod != null and paymentMethod.profitDeductionPercent != 0}"
+               class="hint">Net profit (after discount):</p>
+            <p><strong th:text="'LKR ' + *{netProfit}"></strong></p>
         </div>
     </section>
 </main>
