@@ -219,7 +219,7 @@ public class CustomerOrder {
     }
 
     public PaymentMethod getPaymentMethod() {
-        return paymentMethod;
+.        return paymentMethod;
     }
 
     public void setPaymentMethod(PaymentMethod paymentMethod) {
