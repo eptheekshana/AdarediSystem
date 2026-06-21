@@ -2,6 +2,7 @@ package com.bedsheet.orders.service;
 
 import com.bedsheet.orders.dto.dashboard.DailyMetric;
 import com.bedsheet.orders.dto.dashboard.DashboardView;
+import com.bedsheet.orders.dto.dashboard.DesignMetric;
 import com.bedsheet.orders.dto.dashboard.LabelMetric;
 import com.bedsheet.orders.dto.dashboard.ProductTypeMetric;
 import com.bedsheet.orders.dto.dashboard.RecentOrderRow;
@@ -42,6 +43,7 @@ public class DashboardService {
         view.setByCity(mapLabels(analyticsRepository.byCity(from)).stream().limit(8).toList());
         view.setByBedsheetType(mapTypes(analyticsRepository.byBedsheetType(from)));
         view.setByBedSize(mapLabelsFromBedSize(analyticsRepository.byBedSize(from)));
+        view.setByBeddingDesign(mapDesigns(analyticsRepository.byBeddingDesign(from)).stream().limit(20).toList());
         view.setRecentOrders(mapRecent(analyticsRepository.recentOrders(from, PageRequest.of(0, 10))));
         return view;
     }
@@ -177,6 +179,18 @@ public class DashboardService {
                     String.valueOf(row[0]),
                     ((Number) row[1]).longValue(),
                     toBigDecimal(row[2])));
+        }
+        return metrics;
+    }
+
+    private List<DesignMetric> mapDesigns(List<Object[]> rows) {
+        List<DesignMetric> metrics = new ArrayList<>();
+        for (Object[] row : rows) {
+            metrics.add(new DesignMetric(
+                    String.valueOf(row[0]),
+                    ((Number) row[1]).longValue(),
+                    toBigDecimal(row[2]),
+                    toBigDecimal(row[3])));
         }
         return metrics;
     }

@@ -3,6 +3,7 @@ package com.bedsheet.orders.dto.dashboard;
 import java.math.BigDecimal;
 import java.util.List;
 
+
 public class DashboardView {
 
     private int periodDays;
@@ -34,6 +35,7 @@ public class DashboardView {
     private List<LabelMetric> byCity = List.of();
     private List<ProductTypeMetric> byBedsheetType = List.of();
     private List<LabelMetric> byBedSize = List.of();
+    private List<DesignMetric> byBeddingDesign = List.of();
     private List<RecentOrderRow> recentOrders = List.of();
 
     public int getPeriodDays() {
@@ -259,6 +261,14 @@ public class DashboardView {
 
     public void setByBedSize(List<LabelMetric> byBedSize) {
         this.byBedSize = byBedSize;
+    }
+
+    public List<DesignMetric> getByBeddingDesign() {
+        return byBeddingDesign;
+    }
+
+    public void setByBeddingDesign(List<DesignMetric> byBeddingDesign) {
+        this.byBeddingDesign = byBeddingDesign;
     }
 
     public List<RecentOrderRow> getRecentOrders() {

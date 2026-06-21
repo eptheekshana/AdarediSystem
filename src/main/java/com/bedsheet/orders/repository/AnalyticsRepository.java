@@ -224,6 +224,19 @@ public interface AnalyticsRepository extends JpaRepository<CustomerOrder, Long> 
             """, nativeQuery = true)
     List<Object[]> byBedSize(@Param("from") LocalDateTime from);
 
+    @Query(value = """
+            SELECT i.bedding_design,
+                   COALESCE(SUM(i.quantity), 0) AS total_qty,
+                   COALESCE(SUM(i.line_selling_price), 0) AS total_revenue,
+                   COALESCE(SUM(i.line_profit), 0) AS total_profit
+            FROM order_items i
+            JOIN orders o ON o.id = i.order_id
+            WHERE (:from IS NULL OR o.created_at >= :from)
+            GROUP BY i.bedding_design
+            ORDER BY SUM(i.quantity) DESC
+            """, nativeQuery = true)
+    List<Object[]> byBeddingDesign(@Param("from") LocalDateTime from);
+
     @Query("""
             SELECT o.id, o.waybillNo, o.customerName, o.district, o.createdAt,
                    (o.codValue - o.deliveryCharge), o.netProfit, SIZE(o.items)
