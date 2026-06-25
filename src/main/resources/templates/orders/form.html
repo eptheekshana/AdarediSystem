@@ -21,141 +21,164 @@
     </script>
 </head>
 <body>
-<div th:replace="~{fragments/nav :: main}"></div>
-
-<main class="container layout">
-    <section class="card main-panel">
-        <h2 th:text="${pageTitle}">Create order</h2>
-        <p class="hint">Add one or more products. Selling price and profit use your fixed price list. Discount is subtracted from total profit.</p>
-        <p class="hint curfox-profile" th:if="${curfoxEnabled and not #strings.isEmpty(curfoxBusinessName)}">
-            Royal Express: <strong th:text="${curfoxBusinessName}"></strong>
-            · Origin: <strong th:text="${curfoxOrigin}"></strong>
-        </p>
-
-        <form th:action="${formAction}" th:object="${order}" method="post" id="orderForm">
-            <fieldset>
-                <legend>Delivery &amp; customer</legend>
-                <div class="grid two-col">
-                    <label>Waybill no *
-                        <input type="text" th:field="*{waybillNo}" required>
-                        <span class="error" th:if="${#fields.hasErrors('waybillNo')}" th:errors="*{waybillNo}"></span>
-                    </label>
-                    <label>Order date
-                        <input type="datetime-local" th:field="*{createdAt}">
-                        <span class="hint">Set the order date/time (defaults to now if empty).</span>
-                    </label>
-                    <label>Name *
-                        <input type="text" th:field="*{customerName}" required>
-                    </label>
-                    <label>Primary phone *
-                        <input type="text" th:field="*{primaryPhone}" required>
-                    </label>
-                    <label>Secondary phone
-                        <input type="text" th:field="*{secondaryPhone}">
-                    </label>
-                    <label class="full">Address *
-                        <textarea th:field="*{address}" rows="2" required></textarea>
-                    </label>
-                    <div class="city-search-wrap full">
-                        <label>Destination city (Royal Express) *
-                            <input type="text" th:field="*{nearestCity}" id="nearestCityInput"
-                                   autocomplete="off" required placeholder="Type to search… e.g. Kadaw">
-                            <span class="hint">Suggestions load from Royal Express as you type (min 2 letters).</span>
-                        </label>
-                        <ul id="citySuggestions" class="city-suggestions" hidden></ul>
+<div class="app-container">
+    <div th:replace="~{fragments/nav :: main}"></div>
+    
+    <div class="main-content">
+        <div th:replace="~{fragments/nav :: mobile-header}"></div>
+        
+        <main class="grid two-col" style="grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); align-items: start;">
+            <section class="card">
+                <div class="dash-header" style="margin-bottom: 1rem;">
+                    <div class="dash-header-left">
+                        <h2 class="dash-title" th:text="${pageTitle}" style="font-size: 1.75rem;">Create order</h2>
+                        <p class="dash-subtitle">Add one or more products. Selling price and profit use your fixed price list.</p>
                     </div>
-                    <label>District / state (Royal Express) *
-                        <input type="text" th:field="*{district}" id="districtInput" required
-                               placeholder="Auto-filled when you pick a city">
-                        <span class="hint">Filled automatically from the city you select (e.g. Kadawatha → Gampaha).</span>
-                    </label>
-                    <label>Weight (kg)
-                        <input type="number" step="0.01" min="0" th:field="*{weight}">
-                    </label>
-                    <label>Delivery charge (LKR)
-                        <input type="number" step="0.01" min="0" th:field="*{deliveryCharge}">
-                        <span th:if="${curfoxEnabled}" class="hint">Updated from Royal Express after push to courier.</span>
-                    </label>
-                    <label>COD value (LKR)
-                        <input type="number" step="0.01" min="0" th:field="*{codValue}">
-                    </label>
-                    <label>Discount (LKR)
-                        <input type="number" step="0.01" min="0" th:field="*{discount}" id="discountInput">
-                    </label>
                 </div>
-            </fieldset>
 
-            <fieldset>
-                <legend>Products</legend>
-                <div id="itemsContainer">
-                    <div class="item-row" th:each="item, stat : *{items}">
-                        <h3 th:text="'Product ' + ${stat.index + 1}">Product 1</h3>
-                        <div class="grid three-col">
-                            <label>Type *
-                                <select th:field="*{items[__${stat.index}__].bedsheetType}" class="type-select" required>
-                                    <option th:each="t : ${bedsheetTypes}" th:value="${t}" th:text="${t}"></option>
-                                </select>
+                <p class="hint curfox-profile" th:if="${curfoxEnabled and not #strings.isEmpty(curfoxBusinessName)}">
+                    Royal Express: <strong th:text="${curfoxBusinessName}"></strong>
+                    · Origin: <strong th:text="${curfoxOrigin}"></strong>
+                </p>
+
+                <form th:action="${formAction}" th:object="${order}" method="post" id="orderForm">
+                    <fieldset>
+                        <legend>Delivery &amp; customer</legend>
+                        <div class="grid two-col">
+                            <label>Waybill no *
+                                <input type="text" th:field="*{waybillNo}" required>
+                                <span class="error" th:if="${#fields.hasErrors('waybillNo')}" th:errors="*{waybillNo}"></span>
                             </label>
-                            <label>Bed size *
-                                <select th:field="*{items[__${stat.index}__].bedSize}" class="size-select" required>
-                                    <option th:each="s : ${bedSizes}" th:value="${s}"
-                                            th:text="${#strings.replace(s.name(), '_', ' ')}"></option>
-                                </select>
+                            <label>Order date
+                                <input type="datetime-local" th:field="*{createdAt}">
+                                <span class="hint">Set the order date/time (defaults to now if empty).</span>
                             </label>
-                            <label>Qty
-                                <input type="number" min="1" th:field="*{items[__${stat.index}__].quantity}" class="qty-input">
+                            <label>Name *
+                                <input type="text" th:field="*{customerName}" required>
                             </label>
-                            <label>Pillow cases (Rs. 220 sell, Rs. 125 profit each)
-                                <input type="number" min="0" th:field="*{items[__${stat.index}__].pillowcaseQuantity}" class="pillowcase-input">
+                            <label>Primary phone *
+                                <input type="text" th:field="*{primaryPhone}" required>
                             </label>
-                            <label class="full">Bedding design *
-                                <input type="text" th:field="*{items[__${stat.index}__].beddingDesign}"
-                                       placeholder="e.g. Floral Blue" required>
+                            <label>Secondary phone
+                                <input type="text" th:field="*{secondaryPhone}">
                             </label>
-                            <div class="price-preview full">
-                                <span class="sell-preview">Selling: —</span>
-                                <span class="profit-preview">Profit: —</span>
-                                <span class="pillowcase-preview">Pillow cases: —</span>
+                            <label class="full">Address *
+                                <textarea th:field="*{address}" rows="2" required></textarea>
+                            </label>
+                            <div class="city-search-wrap full">
+                                <label>Destination city (Royal Express) *
+                                    <input type="text" th:field="*{nearestCity}" id="nearestCityInput"
+                                           autocomplete="off" required placeholder="Type to search… e.g. Kadaw">
+                                    <span class="hint">Suggestions load from Royal Express as you type (min 2 letters).</span>
+                                </label>
+                                <ul id="citySuggestions" class="city-suggestions" hidden></ul>
+                            </div>
+                            <label>District / state (Royal Express) *
+                                <input type="text" th:field="*{district}" id="districtInput" required
+                                       placeholder="Auto-filled when you pick a city">
+                                <span class="hint">Filled automatically from the city you select (e.g. Kadawatha → Gampaha).</span>
+                            </label>
+                            <label>Weight (kg)
+                                <input type="number" step="0.01" min="0" th:field="*{weight}">
+                            </label>
+                            <label>Delivery charge (LKR)
+                                <input type="number" step="0.01" min="0" th:field="*{deliveryCharge}">
+                                <span th:if="${curfoxEnabled}" class="hint">Updated from Royal Express after push to courier.</span>
+                            </label>
+                            <label>COD value (LKR)
+                                <input type="number" step="0.01" min="0" th:field="*{codValue}">
+                            </label>
+                            <label>Discount (LKR)
+                                <input type="number" step="0.01" min="0" th:field="*{discount}" id="discountInput">
+                            </label>
+                        </div>
+                    </fieldset>
+
+                    <fieldset>
+                        <legend>Products</legend>
+                        <div id="itemsContainer">
+                            <div class="item-row" th:each="item, stat : *{items}">
+                                <h3 th:text="'Product ' + ${stat.index + 1}">Product 1</h3>
+                                <div class="grid three-col">
+                                    <label>Type *
+                                        <select th:field="*{items[__${stat.index}__].bedsheetType}" class="type-select" required>
+                                            <option th:each="t : ${bedsheetTypes}" th:value="${t}" th:text="${t}"></option>
+                                        </select>
+                                    </label>
+                                    <label>Bed size *
+                                        <select th:field="*{items[__${stat.index}__].bedSize}" class="size-select" required>
+                                            <option th:each="s : ${bedSizes}" th:value="${s}"
+                                                    th:text="${#strings.replace(s.name(), '_', ' ')}"></option>
+                                        </select>
+                                    </label>
+                                    <label>Qty
+                                        <input type="number" min="1" th:field="*{items[__${stat.index}__].quantity}" class="qty-input">
+                                    </label>
+                                    <label>Pillow cases (Rs. 220 sell, Rs. 125 profit each)
+                                        <input type="number" min="0" th:field="*{items[__${stat.index}__].pillowcaseQuantity}" class="pillowcase-input">
+                                    </label>
+                                    <label class="full">Bedding design *
+                                        <input type="text" th:field="*{items[__${stat.index}__].beddingDesign}"
+                                               placeholder="e.g. Floral Blue" required>
+                                    </label>
+                                    <div class="price-preview full">
+                                        <span class="sell-preview">Selling: —</span>
+                                        <span class="profit-preview profit-cell">Profit: —</span>
+                                        <span class="pillowcase-preview">Pillow cases: —</span>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn subtle remove-item" th:if="${stat.index > 0}" style="margin-top: 1rem;">Remove</button>
                             </div>
                         </div>
-                        <button type="button" class="btn subtle remove-item" th:if="${stat.index > 0}">Remove</button>
+                        <button type="button" class="btn secondary" id="addItemBtn" style="margin-top: 1rem;">+ Add product</button>
+                    </fieldset>
+
+                    <div class="summary">
+                        <h3>Estimated totals</h3>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 1.1rem;">
+                            <p style="margin:0; display:flex; justify-content:space-between;"><span>Total selling:</span> <strong id="totalSelling">LKR 0</strong></p>
+                            <p style="margin:0; display:flex; justify-content:space-between;"><span>Gross profit:</span> <strong id="grossProfit" class="profit-cell">LKR 0</strong></p>
+                            <p style="margin:0; display:flex; justify-content:space-between; padding-top:0.5rem; border-top:1px solid var(--border);">
+                                <span>Net profit:</span> <strong id="netProfit" class="profit-cell" style="font-size: 1.25rem;">LKR 0</strong>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div style="margin: 1.5rem 0;">
+                        <label th:if="${!isEditMode and curfoxEnabled}" class="row" style="flex-direction: row; align-items: center; cursor: pointer;">
+                            <input type="checkbox" th:field="*{pushToCurfox}" value="true" style="width: auto;">
+                            Push to Royal Express (Curfox) when saving
+                        </label>
+                        <p th:if="${isEditMode}" class="hint">
+                            This order is being edited locally. Save changes first, then use the order details page to re-sync to Royal Express if needed.
+                        </p>
+                        <p th:unless="${curfoxEnabled or isEditMode}" class="hint">
+                            Royal Express API is not configured. Add CURFOX_* settings in <code>.env</code>.
+                        </p>
+                    </div>
+
+                    <div class="row wrap" style="border-top: 1px solid var(--border); padding-top: 1.5rem;">
+                        <button type="submit" class="btn primary" th:text="${submitLabel}" style="font-size: 1rem; padding: 0.75rem 1.5rem;">Save order</button>
+                        <a class="btn secondary" th:href="${cancelHref}" style="font-size: 1rem; padding: 0.75rem 1.5rem;">Cancel</a>
+                    </div>
+                </form>
+            </section>
+
+            <aside class="card subtle price-table" style="position: sticky; top: 1rem;">
+                <h3 style="margin-top: 0;">Price list (LKR)</h3>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <div th:each="row : ${priceRows}" style="padding-bottom: 0.75rem; border-bottom: 1px solid var(--border);">
+                        <strong th:text="${row.type + ' ' + row.sizeLabel}" style="display: block; font-size: 0.9rem; margin-bottom: 0.25rem;"></strong>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--muted);">
+                            <span th:text="'Sell: ' + ${row.selling}"></span>
+                            <span class="profit-cell" th:text="'Profit: ' + ${row.profit}"></span>
+                        </div>
                     </div>
                 </div>
-                <button type="button" class="btn secondary" id="addItemBtn">+ Add product</button>
-            </fieldset>
-
-            <div class="summary card subtle">
-                <h3>Estimated totals</h3>
-                <p>Total selling: <strong id="totalSelling">LKR 0</strong></p>
-                <p>Gross profit: <strong id="grossProfit">LKR 0</strong></p>
-                <p>Net profit (after discount): <strong id="netProfit">LKR 0</strong></p>
-            </div>
-
-            <label th:if="${!isEditMode and curfoxEnabled}" class="curfox-option full">
-                <input type="checkbox" th:field="*{pushToCurfox}" value="true">
-                Push to Royal Express (Curfox) when saving
-            </label>
-            <p th:if="${isEditMode}" class="hint full">
-                This order is being edited locally. Save changes first, then use the order details page to re-sync to Royal Express if needed.
-            </p>
-            <p th:unless="${curfoxEnabled or isEditMode}" class="hint full">
-                Royal Express API is not configured. Add CURFOX_* settings in <code>.env</code>.
-            </p>
-
-            <div class="row wrap">
-                <button type="submit" class="btn primary" th:text="${submitLabel}">Save order</button>
-                <a class="btn secondary" th:href="${cancelHref}">Cancel</a>
-            </div>
-        </form>
-    </section>
-
-    <aside class="card price-table">
-        <h3>Price list (LKR)</h3>
-        <div th:each="row : ${priceRows}" class="price-group">
-            <p th:text="${row.type + ' ' + row.sizeLabel + ' — Sell ' + row.selling + ', Profit ' + row.profit}"></p>
-        </div>
-    </aside>
-</main>
+            </aside>
+        </main>
+    </div>
+</div>
 
 <script th:inline="javascript">
     const SELLING = [(${sellingPricesJson})];
@@ -164,5 +187,13 @@
 <script th:src="@{/js/theme.js}"></script>
 <script th:src="@{/js/order-form.js}"></script>
 <script th:if="${curfoxEnabled}" th:src="@{/js/city-suggest.js}"></script>
+<script>
+    const currentPath = window.location.pathname;
+    document.querySelectorAll('.nav-link').forEach(link => {
+        if(currentPath.includes(link.getAttribute('href'))) {
+            link.classList.add('active');
+        }
+    });
+</script>
 </body>
 </html>

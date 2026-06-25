@@ -21,157 +21,219 @@
     </script>
 </head>
 <body>
-<div th:replace="~{fragments/nav :: main}"></div>
+<div class="app-container">
+    <div th:replace="~{fragments/nav :: main}"></div>
+    
+    <div class="main-content">
+        <div th:replace="~{fragments/nav :: mobile-header}"></div>
+        
+        <main class="page-shell container">
+            <p class="badge badge-SYNCED" th:if="${successMessage}" th:text="${successMessage}" style="margin-bottom: 1rem;"></p>
+            <p class="badge badge-FAILED" th:if="${errorMessage}" th:text="${errorMessage}" style="margin-bottom: 1rem;"></p>
 
-<main class="container page-shell">
-    <p class="success" th:if="${successMessage}" th:text="${successMessage}"></p>
-    <p class="error" th:if="${errorMessage}" th:text="${errorMessage}"></p>
-
-    <section class="card" th:object="${order}">
-        <div class="row between wrap">
-            <div>
-                <h2 th:text="'Order — Waybill ' + *{waybillNo}">Order</h2>
-                <p class="hint">Created on <span th:text="${#temporals.format(order.createdAt, 'yyyy-MM-dd HH:mm')}"></span></p>
-            </div>
-            <div class="row wrap">
-                <a class="btn secondary" th:href="@{/orders/{id}/edit(id=${order.id})}">Edit order</a>
-                <form method="post" th:action="@{/orders/{id}/delete(id=${order.id})}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this order? This action cannot be undone.');">
-                    <button type="submit" class="btn subtle" style="color: var(--danger);">Delete order</button>
-                </form>
-                <a class="btn subtle" th:href="@{/orders}">Back to orders</a>
-            </div>
-        </div>
-
-        <div class="grid two-col meta">
-            <p><strong>Name:</strong> <span th:text="*{customerName}"></span></p>
-            <p><strong>Primary phone:</strong> <span th:text="*{primaryPhone}"></span></p>
-            <p><strong>Secondary phone:</strong> <span th:text="*{secondaryPhone} ?: '—'"></span></p>
-            <p><strong>Address:</strong> <span th:text="*{address}"></span></p>
-            <p><strong>Nearest city:</strong> <span th:text="*{nearestCity}"></span></p>
-            <p><strong>District / state:</strong> <span th:text="*{district}"></span></p>
-            <p><strong>Weight:</strong> <span th:text="*{weight} ?: '—'"></span></p>
-            <p><strong>Delivery charge:</strong> LKR <span th:text="*{deliveryCharge}"></span></p>
-            <p><strong>COD value:</strong> LKR <span th:text="*{codValue}"></span></p>
-            <p><strong>Discount:</strong> LKR <span th:text="*{discount}"></span></p>
-        </div>
-
-        <div th:if="${curfoxEnabled}" class="card subtle curfox-panel">
-            <h3>Royal Express (Curfox)</h3>
-            <p>
-                <span class="badge" th:classappend="' badge-' + *{curfoxSyncStatus.name()}"
-                      th:text="*{curfoxSyncStatus}">NOT_SYNCED</span>
-                <span th:if="*{curfoxLastStatus}" th:text="'Latest: ' + *{curfoxLastStatus}"></span>
-            </p>
-            <p th:if="*{curfoxSyncMessage}" class="hint" th:text="*{curfoxSyncMessage}"></p>
-            <p th:if="*{curfoxSyncedAt}" class="hint"
-               th:text="'Last sync: ' + ${#temporals.format(order.curfoxSyncedAt, 'yyyy-MM-dd HH:mm')}"></p>
-            <div class="row wrap">
-                <form th:action="@{/orders/{id}/curfox/sync(id=${order.id})}" method="post">
-                    <button type="submit" class="btn secondary">Push / re-sync to Royal Express</button>
-                </form>
-                <form th:action="@{/orders/{id}/curfox/tracking(id=${order.id})}" method="post">
-                    <button type="submit" class="btn subtle">Refresh tracking</button>
-                </form>
-            </div>
-        </div>
-
-        <div th:if="${tracking != null}" class="card subtle">
-            <h3>Tracking timeline</h3>
-            <p th:if="${#lists.isEmpty(tracking)}" class="hint">No tracking events yet.</p>
-            <ul class="tracking-list" th:if="${!#lists.isEmpty(tracking)}">
-                <li th:each="t : ${tracking}">
-                    <strong th:text="${t.statusName}">STATUS</strong>
-                    <span th:text="${t.dateTimeAgo}"></span>
-                    <span th:if="${t.userName}" th:text="' — ' + ${t.userName}"></span>
-                </li>
-            </ul>
-        </div>
-
-        <h3>Products</h3>
-        <div class="record-list mobile-only">
-            <article class="card subtle record-card" th:each="item, stat : *{items}">
-                <div class="row between wrap">
+            <section class="card" th:object="${order}">
+                <div class="row between wrap" style="border-bottom: 1px solid var(--border); padding-bottom: 1.5rem; margin-bottom: 1.5rem;">
                     <div>
-                        <span class="kpi-label">Product</span>
-                        <strong class="insight-value" th:text="'Item ' + ${stat.index + 1}">Item 1</strong>
+                        <h2 style="font-size: 2.25rem; font-weight: 800; margin: 0 0 0.25rem; line-height: 1.2;" th:text="'Waybill ' + *{waybillNo}">Waybill</h2>
+                        <p class="hint" style="margin: 0;">Created on <span th:text="${#temporals.format(order.createdAt, 'yyyy-MM-dd HH:mm')}"></span></p>
                     </div>
-                    <span class="badge">Qty <span th:text="${item.quantity}"></span></span>
-                </div>
-                <div class="record-grid">
-                    <div class="record-field">
-                        <span class="record-label">Type</span>
-                        <span class="record-value" th:text="${item.bedsheetType}"></span>
-                    </div>
-                    <div class="record-field">
-                        <span class="record-label">Size</span>
-                        <span class="record-value" th:text="${#strings.replace(item.bedSize.name(), '_', ' ')}"></span>
-                    </div>
-                    <div class="record-field">
-                        <span class="record-label">Design</span>
-                        <span class="record-value" th:text="${item.beddingDesign}"></span>
-                    </div>
-                    <div class="record-field">
-                        <span class="record-label">Pillow cases</span>
-                        <span class="record-value" th:text="${item.pillowcaseQuantity}"></span>
-                    </div>
-                    <div class="record-field">
-                        <span class="record-label">Unit sell</span>
-                        <span class="record-value" th:text="${item.unitSellingPrice}"></span>
-                    </div>
-                    <div class="record-field">
-                        <span class="record-label">Unit profit</span>
-                        <span class="record-value" th:text="${item.unitProfit}"></span>
-                    </div>
-                    <div class="record-field">
-                        <span class="record-label">Line sell</span>
-                        <span class="record-value" th:text="${item.lineSellingPrice}"></span>
-                    </div>
-                    <div class="record-field">
-                        <span class="record-label">Line profit</span>
-                        <span class="record-value" th:text="${item.lineProfit}"></span>
+                    <div class="row wrap">
+                        <a class="btn primary" th:href="@{/orders/{id}/edit(id=${order.id})}">Edit order</a>
+                        <form method="post" th:action="@{/orders/{id}/delete(id=${order.id})}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this order? This action cannot be undone.');">
+                            <button type="submit" class="btn subtle">Delete order</button>
+                        </form>
+                        <a class="btn secondary" th:href="@{/orders}">Back</a>
                     </div>
                 </div>
-            </article>
-        </div>
 
-        <div class="desktop-only table-wrap">
-            <table class="data-table">
-                <thead>
-                <tr>
-                    <th>Type</th>
-                    <th>Size</th>
-                    <th>Design</th>
-                    <th>Qty</th>
-                    <th>Pillow cases</th>
-                    <th>Unit sell</th>
-                    <th>Unit profit</th>
-                    <th>Line sell</th>
-                    <th>Line profit</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="item : *{items}">
-                    <td th:text="${item.bedsheetType}"></td>
-                    <td th:text="${#strings.replace(item.bedSize.name(), '_', ' ')}"></td>
-                    <td th:text="${item.beddingDesign}"></td>
-                    <td th:text="${item.quantity}"></td>
-                    <td th:text="${item.pillowcaseQuantity}"></td>
-                    <td th:text="${item.unitSellingPrice}"></td>
-                    <td th:text="${item.unitProfit}"></td>
-                    <td th:text="${item.lineSellingPrice}"></td>
-                    <td th:text="${item.lineProfit}"></td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
+                <div class="grid three-col meta" style="margin-bottom: 2.5rem;">
+                    <div class="record-field">
+                        <span class="record-label">Customer Name</span>
+                        <span class="record-value" th:text="*{customerName}"></span>
+                    </div>
+                    <div class="record-field">
+                        <span class="record-label">Primary Phone</span>
+                        <span class="record-value" th:text="*{primaryPhone}"></span>
+                    </div>
+                    <div class="record-field">
+                        <span class="record-label">Secondary Phone</span>
+                        <span class="record-value" th:text="*{secondaryPhone} ?: '—'"></span>
+                    </div>
+                    <div class="record-field full">
+                        <span class="record-label">Address</span>
+                        <span class="record-value" th:text="*{address}"></span>
+                    </div>
+                    <div class="record-field">
+                        <span class="record-label">Nearest City</span>
+                        <span class="record-value" th:text="*{nearestCity}"></span>
+                    </div>
+                    <div class="record-field">
+                        <span class="record-label">District / State</span>
+                        <span class="record-value" th:text="*{district}"></span>
+                    </div>
+                    <div class="record-field">
+                        <span class="record-label">Weight</span>
+                        <span class="record-value" th:text="*{weight} != null ? *{weight} + ' kg' : '—'"></span>
+                    </div>
+                </div>
 
-        <div class="summary card subtle">
-            <p>Total selling: <strong th:text="'LKR ' + *{totalSellingPrice}"></strong></p>
-            <p>Gross profit: <strong th:text="'LKR ' + *{grossProfit}"></strong></p>
-            <p>Net profit (after discount): <strong th:text="'LKR ' + *{netProfit}"></strong></p>
-        </div>
-    </section>
-</main>
+                <div class="grid three-col" style="margin-bottom: 2.5rem; padding: 1.5rem; background: var(--bg-accent); border-radius: var(--radius-md);">
+                    <div class="record-field">
+                        <span class="record-label">Delivery Charge</span>
+                        <span class="record-value">LKR <span th:text="*{deliveryCharge}"></span></span>
+                    </div>
+                    <div class="record-field">
+                        <span class="record-label">COD Value</span>
+                        <span class="record-value">LKR <span th:text="*{codValue}"></span></span>
+                    </div>
+                    <div class="record-field">
+                        <span class="record-label">Discount</span>
+                        <span class="record-value">LKR <span th:text="*{discount}"></span></span>
+                    </div>
+                </div>
+
+                <div th:if="${curfoxEnabled}" class="card subtle curfox-profile" style="margin-bottom: 2.5rem;">
+                    <h3 style="margin-top: 0; margin-bottom: 1rem; color: var(--text);">Royal Express (Curfox)</h3>
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;">
+                        <div>
+                            <span class="badge" th:classappend="' badge-' + *{curfoxSyncStatus.name()}"
+                                  th:text="*{curfoxSyncStatus}">NOT_SYNCED</span>
+                            <strong style="margin-left: 0.5rem;" th:if="*{curfoxLastStatus}" th:text="'Latest: ' + *{curfoxLastStatus}"></strong>
+                        </div>
+                        <p th:if="*{curfoxSyncMessage}" class="hint" th:text="*{curfoxSyncMessage}" style="margin: 0;"></p>
+                        <p th:if="*{curfoxSyncedAt}" class="hint"
+                           th:text="'Last sync: ' + ${#temporals.format(order.curfoxSyncedAt, 'yyyy-MM-dd HH:mm')}" style="margin: 0;"></p>
+                    </div>
+                    <div class="row wrap">
+                        <form th:action="@{/orders/{id}/curfox/sync(id=${order.id})}" method="post">
+                            <button type="submit" class="btn primary" style="background: var(--info); color: white; border: none;">Push / re-sync to Royal Express</button>
+                        </form>
+                        <form th:action="@{/orders/{id}/curfox/tracking(id=${order.id})}" method="post">
+                            <button type="submit" class="btn secondary">Refresh tracking</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div th:if="${tracking != null}" class="card subtle" style="margin-bottom: 2.5rem;">
+                    <h3 style="margin-top: 0; margin-bottom: 1rem;">Tracking timeline</h3>
+                    <p th:if="${#lists.isEmpty(tracking)}" class="hint" style="margin: 0;">No tracking events yet.</p>
+                    <ul class="tracking-list" th:if="${!#lists.isEmpty(tracking)}">
+                        <li th:each="t : ${tracking}">
+                            <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                                <strong th:text="${t.statusName}" style="color: var(--text);">STATUS</strong>
+                                <div style="font-size: 0.85rem; color: var(--muted);">
+                                    <span th:text="${t.dateTimeAgo}"></span>
+                                    <span th:if="${t.userName}" th:text="' — ' + ${t.userName}"></span>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div style="margin-bottom: 2.5rem;">
+                    <h3 style="margin-bottom: 1rem;">Products</h3>
+                    <div class="record-list mobile-only">
+                        <article class="card subtle record-card" th:each="item, stat : *{items}">
+                            <div class="row between wrap" style="margin-bottom: 1rem;">
+                                <div>
+                                    <span class="kpi-card-label">Product</span>
+                                    <strong class="insight-big" th:text="'Item ' + ${stat.index + 1}" style="margin: 0;">Item 1</strong>
+                                </div>
+                                <span class="badge">Qty <span th:text="${item.quantity}" style="margin-left: 0.25rem;"></span></span>
+                            </div>
+                            <div class="record-grid">
+                                <div class="record-field">
+                                    <span class="record-label">Type</span>
+                                    <span class="record-value" th:text="${item.bedsheetType}"></span>
+                                </div>
+                                <div class="record-field">
+                                    <span class="record-label">Size</span>
+                                    <span class="record-value" th:text="${#strings.replace(item.bedSize.name(), '_', ' ')}"></span>
+                                </div>
+                                <div class="record-field">
+                                    <span class="record-label">Design</span>
+                                    <span class="record-value" th:text="${item.beddingDesign}"></span>
+                                </div>
+                                <div class="record-field">
+                                    <span class="record-label">Pillow cases</span>
+                                    <span class="record-value" th:text="${item.pillowcaseQuantity}"></span>
+                                </div>
+                                <div class="record-field">
+                                    <span class="record-label">Unit sell</span>
+                                    <span class="record-value" th:text="${item.unitSellingPrice}"></span>
+                                </div>
+                                <div class="record-field">
+                                    <span class="record-label">Unit profit</span>
+                                    <span class="record-value profit-cell" th:text="${item.unitProfit}"></span>
+                                </div>
+                                <div class="record-field">
+                                    <span class="record-label">Line sell</span>
+                                    <span class="record-value" th:text="${item.lineSellingPrice}"></span>
+                                </div>
+                                <div class="record-field">
+                                    <span class="record-label">Line profit</span>
+                                    <span class="record-value profit-cell" th:text="${item.lineProfit}"></span>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+
+                    <div class="desktop-only table-wrap">
+                        <table class="data-table">
+                            <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Size</th>
+                                <th>Design</th>
+                                <th>Qty</th>
+                                <th>Pillow cases</th>
+                                <th>Unit sell</th>
+                                <th>Unit profit</th>
+                                <th>Line sell</th>
+                                <th>Line profit</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="item : *{items}">
+                                <td th:text="${item.bedsheetType}" style="font-weight: 500;"></td>
+                                <td th:text="${#strings.replace(item.bedSize.name(), '_', ' ')}"></td>
+                                <td th:text="${item.beddingDesign}"></td>
+                                <td th:text="${item.quantity}"></td>
+                                <td th:text="${item.pillowcaseQuantity}"></td>
+                                <td th:text="${item.unitSellingPrice}"></td>
+                                <td class="profit-cell" th:text="${item.unitProfit}"></td>
+                                <td th:text="${item.lineSellingPrice}"></td>
+                                <td class="profit-cell" th:text="${item.lineProfit}"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="summary" style="background: var(--surface-soft); display: flex; flex-direction: column; gap: 0.5rem; font-size: 1.1rem; padding: 1.5rem; border-radius: 0 var(--radius-md) var(--radius-md) 0;">
+                    <p style="margin: 0; display: flex; justify-content: space-between;">
+                        <span>Total selling:</span> <strong th:text="'LKR ' + *{totalSellingPrice}"></strong>
+                    </p>
+                    <p style="margin: 0; display: flex; justify-content: space-between;">
+                        <span>Gross profit:</span> <strong class="profit-cell" th:text="'LKR ' + *{grossProfit}"></strong>
+                    </p>
+                    <p style="margin: 0; display: flex; justify-content: space-between; padding-top: 0.75rem; border-top: 1px solid var(--border);">
+                        <span>Net profit:</span> <strong class="profit-cell" style="font-size: 1.5rem;" th:text="'LKR ' + *{netProfit}"></strong>
+                    </p>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+
 <script th:src="@{/js/theme.js}"></script>
+<script>
+    const currentPath = window.location.pathname;
+    document.querySelectorAll('.nav-link').forEach(link => {
+        if(currentPath.includes(link.getAttribute('href'))) {
+            link.classList.add('active');
+        }
+    });
+</script>
 </body>
 </html>
