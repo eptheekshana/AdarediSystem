@@ -2,36 +2,47 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>ADAREDI.COM — Page not found</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADAREDI — Page Not Found (404)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/app.css}">
     <script>
         (function () {
             try {
                 const stored = localStorage.getItem('bedsheet-theme');
-                const theme = stored === 'dark' || stored === 'light'
-                    ? stored
-                    : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                const theme = stored === 'dark' || stored === 'light' ? stored : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
                 document.documentElement.dataset.theme = theme;
                 document.documentElement.style.colorScheme = theme;
-            } catch (e) {
-                document.documentElement.style.colorScheme = 'light';
-            }
+            } catch (e) { document.documentElement.style.colorScheme = 'light'; }
         })();
     </script>
 </head>
 <body>
-<div th:replace="~{fragments/nav :: main}"></div>
-<main class="container page-shell">
-    <section class="card">
-        <h2>Page not found (404)</h2>
-        <p>This URL is not mapped. Use one of these:</p>
-        <ul>
-            <li><a th:href="@{/dashboard}">/dashboard</a> — analytics</li>
-            <li><a th:href="@{/orders/new}">/orders/new</a> — create order</li>
-            <li><a th:href="@{/orders}">/orders</a> — list orders</li>
-        </ul>
-    </section>
-</main>
+<div class="app-container">
+    <div th:replace="~{fragments/nav :: main}"></div>
+    
+    <div class="main-content">
+        <div th:replace="~{fragments/nav :: mobile-header}"></div>
+        
+        <main style="max-width: 600px; margin: 3rem auto; text-align: center;">
+            <div class="card" style="padding: 3.5rem 2rem;">
+                <div style="font-size: 4rem; font-weight: 800; line-height: 1; margin-bottom: 1rem; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    404
+                </div>
+                <h1 style="font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.5rem;">Page Not Found</h1>
+                <p style="color: var(--text-muted); margin-bottom: 2rem;">The requested link does not exist or may have been relocated.</p>
+                
+                <div class="row wrap" style="justify-content: center; gap: 0.75rem;">
+                    <a th:href="@{/dashboard}" class="btn primary">Dashboard</a>
+                    <a th:href="@{/orders/new}" class="btn secondary">Create Order</a>
+                    <a th:href="@{/orders}" class="btn secondary">All Orders</a>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
 <script th:src="@{/js/theme.js}"></script>
 </body>
 </html>

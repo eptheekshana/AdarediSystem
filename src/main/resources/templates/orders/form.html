@@ -3,11 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="'ADAREDI.COM - ' + ${pageTitle}">ADAREDI.COM - New Order</title>
+    <title th:text="'ADAREDI — ' + ${pageTitle}">ADAREDI — Create Order</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/app.css}">
     <script>
         (function () {
             try {
+                const params = new URLSearchParams(window.location.search);
+                const urlTheme = params.get('theme');
+                if (urlTheme === 'dark' || urlTheme === 'light') {
+                    try { localStorage.setItem('bedsheet-theme', urlTheme); } catch(e){}
+                }
                 const stored = localStorage.getItem('bedsheet-theme');
                 const theme = stored === 'dark' || stored === 'light'
                     ? stored
@@ -27,151 +35,214 @@
     <div class="main-content">
         <div th:replace="~{fragments/nav :: mobile-header}"></div>
         
-        <main class="grid two-col" style="grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); align-items: start;">
-            <section class="card">
-                <div class="dash-header" style="margin-bottom: 1rem;">
+        <main class="grid two-col" style="grid-template-columns: minmax(0, 1.8fr) minmax(320px, 1fr); align-items: start; gap: 1.75rem;">
+            <div>
+                <!-- Page Title -->
+                <div class="dash-header" style="margin-bottom: 1.5rem;">
                     <div class="dash-header-left">
-                        <h2 class="dash-title" th:text="${pageTitle}" style="font-size: 1.75rem;">Create order</h2>
-                        <p class="dash-subtitle">Add one or more products. Selling price and profit use your fixed price list.</p>
+                        <div class="dash-eyebrow">
+                            <span class="pulse-dot"></span>
+                            <span th:text="${isEditMode} ? 'Editing Record' : 'New Dispatch'">New Dispatch</span>
+                        </div>
+                        <h1 class="dash-title" th:text="${pageTitle}" style="font-size: 2rem;">Create Order</h1>
+                        <p class="dash-subtitle">Fill courier logistics and products. Real-time pricing applies from your price list.</p>
                     </div>
                 </div>
 
-                <p class="hint curfox-profile" th:if="${curfoxEnabled and not #strings.isEmpty(curfoxBusinessName)}">
-                    Royal Express: <strong th:text="${curfoxBusinessName}"></strong>
-                    · Origin: <strong th:text="${curfoxOrigin}"></strong>
-                </p>
+                <div class="curfox-profile" th:if="${curfoxEnabled and not #strings.isEmpty(curfoxBusinessName)}" style="margin-bottom: 1.5rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        <span>Courier Integration: <strong>Royal Express</strong> &bull; Origin: <strong th:text="${curfoxOrigin}"></strong></span>
+                    </div>
+                </div>
 
                 <form th:action="${formAction}" th:object="${order}" method="post" id="orderForm">
-                    <fieldset>
-                        <legend>Delivery &amp; customer</legend>
+                    <!-- Delivery & Customer Details Card -->
+                    <section class="form-section-card">
+                        <h2 class="form-section-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            Customer &amp; Delivery Logistics
+                        </h2>
+                        
                         <div class="grid two-col">
-                            <label>Waybill no *
-                                <input type="text" th:field="*{waybillNo}" required>
+                            <label>Waybill Number *
+                                <input type="text" th:field="*{waybillNo}" required placeholder="e.g. WB89216">
                                 <span class="error" th:if="${#fields.hasErrors('waybillNo')}" th:errors="*{waybillNo}"></span>
                             </label>
-                            <label>Order date
+                            
+                            <label>Order Date &amp; Time
                                 <input type="datetime-local" th:field="*{createdAt}">
-                                <span class="hint">Set the order date/time (defaults to now if empty).</span>
+                                <span class="hint">Defaults to current time if left empty.</span>
                             </label>
-                            <label>Name *
-                                <input type="text" th:field="*{customerName}" required>
+                            
+                            <label>Customer Full Name *
+                                <input type="text" th:field="*{customerName}" required placeholder="e.g. Ruwan Perera">
                             </label>
-                            <label>Primary phone *
-                                <input type="text" th:field="*{primaryPhone}" required>
+                            
+                            <label>Primary Phone Number *
+                                <input type="text" th:field="*{primaryPhone}" required placeholder="e.g. 0771234567">
                             </label>
-                            <label>Secondary phone
-                                <input type="text" th:field="*{secondaryPhone}">
+                            
+                            <label>Secondary Phone Number
+                                <input type="text" th:field="*{secondaryPhone}" placeholder="Optional backup contact">
                             </label>
-                            <label class="full">Address *
-                                <textarea th:field="*{address}" rows="2" required></textarea>
+
+                            <label class="full">Delivery Street Address *
+                                <textarea th:field="*{address}" rows="2" required placeholder="House no, street name, landmarks"></textarea>
                             </label>
+
                             <div class="city-search-wrap full">
-                                <label>Destination city (Royal Express) *
+                                <label>Destination City (Royal Express Hub) *
                                     <input type="text" th:field="*{nearestCity}" id="nearestCityInput"
-                                           autocomplete="off" required placeholder="Type to search… e.g. Kadaw">
-                                    <span class="hint">Suggestions load from Royal Express as you type (min 2 letters).</span>
+                                           autocomplete="off" required placeholder="Type city to search... e.g. Kadawatha, Galle, Kandy">
+                                    <span class="hint">Live courier suggestions appear as you type (minimum 2 letters).</span>
                                 </label>
                                 <ul id="citySuggestions" class="city-suggestions" hidden></ul>
                             </div>
-                            <label>District / state (Royal Express) *
+
+                            <label>District / Zone *
                                 <input type="text" th:field="*{district}" id="districtInput" required
-                                       placeholder="Auto-filled when you pick a city">
-                                <span class="hint">Filled automatically from the city you select (e.g. Kadawatha → Gampaha).</span>
+                                       placeholder="Auto-populated from destination city">
+                                <span class="hint">Filled automatically when city is picked (e.g. Kadawatha &rarr; Gampaha).</span>
                             </label>
-                            <label>Weight (kg)
-                                <input type="number" step="0.01" min="0" th:field="*{weight}">
+
+                            <label>Package Weight (kg)
+                                <input type="number" step="0.01" min="0" th:field="*{weight}" placeholder="e.g. 1.8">
                             </label>
-                            <label>Delivery charge (LKR)
-                                <input type="number" step="0.01" min="0" th:field="*{deliveryCharge}">
-                                <span th:if="${curfoxEnabled}" class="hint">Updated from Royal Express after push to courier.</span>
+
+                            <label>Delivery Charge (LKR)
+                                <input type="number" step="0.01" min="0" th:field="*{deliveryCharge}" id="deliveryChargeInput" placeholder="0.00">
+                                <span th:if="${curfoxEnabled}" class="hint">Updated from Royal Express rate upon courier push.</span>
                             </label>
-                            <label>COD value (LKR)
-                                <input type="number" step="0.01" min="0" th:field="*{codValue}">
+
+                            <label>COD Amount (LKR)
+                                <input type="number" step="0.01" min="0" th:field="*{codValue}" id="codValueInput" placeholder="Total collectable on delivery">
                             </label>
-                            <label>Discount (LKR)
-                                <input type="number" step="0.01" min="0" th:field="*{discount}" id="discountInput">
+
+                            <label class="full">Discount Given (LKR)
+                                <input type="number" step="0.01" min="0" th:field="*{discount}" id="discountInput" placeholder="0.00">
+                                <span class="hint">Directly deducted from gross profit to compute net earnings.</span>
                             </label>
                         </div>
-                    </fieldset>
+                    </section>
 
-                    <fieldset>
-                        <legend>Products</legend>
+                    <!-- Product Items Card -->
+                    <section class="form-section-card">
+                        <div class="row between wrap" style="margin-bottom: 1.25rem;">
+                            <h2 class="form-section-title" style="margin-bottom: 0;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                                Bedsheet Line Items
+                            </h2>
+                            <button type="button" class="btn secondary" id="addItemBtn" style="font-size: 0.85rem; padding: 0.4rem 0.9rem;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                Add Another Product
+                            </button>
+                        </div>
+
                         <div id="itemsContainer">
                             <div class="item-row" th:each="item, stat : *{items}">
-                                <h3 th:text="'Product ' + ${stat.index + 1}">Product 1</h3>
+                                <div class="item-row-head">
+                                    <span class="item-row-badge" th:text="'Product #' + ${stat.index + 1}">Product #1</span>
+                                    <button type="button" class="btn subtle remove-item" th:if="${stat.index > 0}" style="padding: 0.25rem 0.6rem; font-size: 0.8rem;">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                        Remove
+                                    </button>
+                                </div>
                                 <div class="grid three-col">
-                                    <label>Type *
+                                    <label>Bedsheet Type *
                                         <select th:field="*{items[__${stat.index}__].bedsheetType}" class="type-select" required>
                                             <option th:each="t : ${bedsheetTypes}" th:value="${t}" th:text="${t}"></option>
                                         </select>
                                     </label>
-                                    <label>Bed size *
+                                    <label>Bed Size *
                                         <select th:field="*{items[__${stat.index}__].bedSize}" class="size-select" required>
                                             <option th:each="s : ${bedSizes}" th:value="${s}"
                                                     th:text="${#strings.replace(s.name(), '_', ' ')}"></option>
                                         </select>
                                     </label>
-                                    <label>Qty
-                                        <input type="number" min="1" th:field="*{items[__${stat.index}__].quantity}" class="qty-input">
+                                    <label>Quantity
+                                        <input type="number" min="1" th:field="*{items[__${stat.index}__].quantity}" class="qty-input" required>
                                     </label>
-                                    <label>Pillow cases (Rs. 220 sell, Rs. 125 profit each)
+                                    <label>Extra Pillowcases (Rs. 220 sell, Rs. 125 profit)
                                         <input type="number" min="0" th:field="*{items[__${stat.index}__].pillowcaseQuantity}" class="pillowcase-input">
                                     </label>
-                                    <label class="full">Bedding design *
+                                    <label class="full">Bedding Design *
                                         <input type="text" th:field="*{items[__${stat.index}__].beddingDesign}"
-                                               placeholder="e.g. Floral Blue" required>
+                                               placeholder="e.g. Royal Mandala, Ocean Breeze, Velvet Blossom" required>
                                     </label>
                                     <div class="price-preview full">
-                                        <span class="sell-preview">Selling: —</span>
-                                        <span class="profit-preview profit-cell">Profit: —</span>
-                                        <span class="pillowcase-preview">Pillow cases: —</span>
+                                        <span class="sell-preview">Sell: —</span>
+                                        <span class="profit-preview">Profit: —</span>
+                                        <span class="pillowcase-preview" style="display: none;">Pillowcases: —</span>
                                     </div>
                                 </div>
-                                <button type="button" class="btn subtle remove-item" th:if="${stat.index > 0}" style="margin-top: 1rem;">Remove</button>
                             </div>
                         </div>
-                        <button type="button" class="btn secondary" id="addItemBtn" style="margin-top: 1rem;">+ Add product</button>
-                    </fieldset>
-
-                    <div class="summary">
-                        <h3>Estimated totals</h3>
-                        <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 1.1rem;">
-                            <p style="margin:0; display:flex; justify-content:space-between;"><span>Total selling:</span> <strong id="totalSelling">LKR 0</strong></p>
-                            <p style="margin:0; display:flex; justify-content:space-between;"><span>Gross profit:</span> <strong id="grossProfit" class="profit-cell">LKR 0</strong></p>
-                            <p style="margin:0; display:flex; justify-content:space-between; padding-top:0.5rem; border-top:1px solid var(--border);">
-                                <span>Net profit:</span> <strong id="netProfit" class="profit-cell" style="font-size: 1.25rem;">LKR 0</strong>
-                            </p>
-                        </div>
-                    </div>
-
-                    <div style="margin: 1.5rem 0;">
-                        <label th:if="${!isEditMode and curfoxEnabled}" class="row" style="flex-direction: row; align-items: center; cursor: pointer;">
-                            <input type="checkbox" th:field="*{pushToCurfox}" value="true" style="width: auto;">
-                            Push to Royal Express (Curfox) when saving
-                        </label>
-                        <p th:if="${isEditMode}" class="hint">
-                            This order is being edited locally. Save changes first, then use the order details page to re-sync to Royal Express if needed.
-                        </p>
-                        <p th:unless="${curfoxEnabled or isEditMode}" class="hint">
-                            Royal Express API is not configured. Add CURFOX_* settings in <code>.env</code>.
-                        </p>
-                    </div>
-
-                    <div class="row wrap" style="border-top: 1px solid var(--border); padding-top: 1.5rem;">
-                        <button type="submit" class="btn primary" th:text="${submitLabel}" style="font-size: 1rem; padding: 0.75rem 1.5rem;">Save order</button>
-                        <a class="btn secondary" th:href="${cancelHref}" style="font-size: 1rem; padding: 0.75rem 1.5rem;">Cancel</a>
-                    </div>
+                    </section>
                 </form>
-            </section>
+            </div>
 
-            <aside class="card subtle price-table" style="position: sticky; top: 1rem;">
-                <h3 style="margin-top: 0;">Price list (LKR)</h3>
+            <!-- Sticky Summary Sidebar -->
+            <aside class="summary-sidebar-card">
+                <h3 style="margin-bottom: 0.5rem; font-size: 1.2rem; font-weight: 800; letter-spacing: -0.02em;">Order Calculation</h3>
+                <p class="hint" style="margin-top: 0; margin-bottom: 1rem;">Calculated automatically based on your fixed pricing rules.</p>
+
+                <!-- Hero Net Profit Box -->
+                <div class="summary-profit-hero">
+                    <div class="row between">
+                        <span class="summary-profit-label">Estimated Net Profit</span>
+                        <span class="margin-badge" id="netMarginPct">0.0%</span>
+                    </div>
+                    <strong class="summary-profit-val" id="netProfit">LKR 0</strong>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 0.75rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--border); font-size: 0.95rem;">
+                    <div class="row between">
+                        <span style="color: var(--text-muted);">Total Selling Price:</span>
+                        <strong id="totalSelling">LKR 0</strong>
+                    </div>
+                    <div class="row between">
+                        <span style="color: var(--text-muted);">Gross Profit:</span>
+                        <strong id="grossProfit" class="profit-cell">LKR 0</strong>
+                    </div>
+                </div>
+
+                <!-- Courier Dispatch Checkbox -->
+                <div style="margin: 1.25rem 0;">
+                    <label th:if="${!isEditMode and curfoxEnabled}" style="flex-direction: row; align-items: center; gap: 0.75rem; cursor: pointer;">
+                        <input type="checkbox" form="orderForm" th:field="*{pushToCurfox}" value="true" style="width: auto;">
+                        <span style="font-size: 0.85rem; font-weight: 600;">Push to Royal Express (Curfox) on save</span>
+                    </label>
+                    <p th:if="${isEditMode}" class="hint">
+                        Editing local record. Save changes first, then sync via the details page if required.
+                    </p>
+                    <p th:unless="${curfoxEnabled or isEditMode}" class="hint">
+                        Royal Express courier API is not configured.
+                    </p>
+                </div>
+
+                <!-- Action Buttons -->
                 <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                    <div th:each="row : ${priceRows}" style="padding-bottom: 0.75rem; border-bottom: 1px solid var(--border);">
-                        <strong th:text="${row.type + ' ' + row.sizeLabel}" style="display: block; font-size: 0.9rem; margin-bottom: 0.25rem;"></strong>
-                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--muted);">
-                            <span th:text="'Sell: ' + ${row.selling}"></span>
-                            <span class="profit-cell" th:text="'Profit: ' + ${row.profit}"></span>
+                    <button type="submit" form="orderForm" class="btn primary" style="width: 100%; padding: 0.8rem 1.5rem; font-size: 1rem;" th:text="${submitLabel}">
+                        Save Order
+                    </button>
+                    <a class="btn secondary" th:href="${cancelHref}" style="width: 100%; text-align: center;">
+                        Cancel
+                    </a>
+                </div>
+
+                <!-- Price List Accordion / Reference -->
+                <div style="margin-top: 2rem; padding-top: 1.25rem; border-top: 1px solid var(--border);">
+                    <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">
+                        Fixed Price Guide (LKR)
+                    </h4>
+                    <div style="max-height: 240px; overflow-y: auto; padding-right: 0.35rem; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.82rem;">
+                        <div th:each="row : ${priceRows}" style="display: flex; justify-content: space-between; padding: 0.35rem 0.5rem; background: var(--surface-glass-alt); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+                            <span th:text="${row.type + ' ' + row.sizeLabel}" style="font-weight: 600;"></span>
+                            <div>
+                                <span th:text="'Rs.' + ${row.selling}"></span> &bull;
+                                <strong class="profit-cell" th:text="'+' + ${row.profit}"></strong>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -181,16 +252,15 @@
 </div>
 
 <script th:inline="javascript">
-    const SELLING = [(${sellingPricesJson})];
-    const PROFITS = [(${unitProfitsJson})];
+    window.SELLING = [(${sellingPricesJson})];
+    window.PROFITS = [(${unitProfitsJson})];
 </script>
 <script th:src="@{/js/theme.js}"></script>
 <script th:src="@{/js/order-form.js}"></script>
 <script th:if="${curfoxEnabled}" th:src="@{/js/city-suggest.js}"></script>
 <script>
-    const currentPath = window.location.pathname;
     document.querySelectorAll('.nav-link').forEach(link => {
-        if(currentPath.includes(link.getAttribute('href'))) {
+        if (link.getAttribute('href') === '/orders/new') {
             link.classList.add('active');
         }
     });

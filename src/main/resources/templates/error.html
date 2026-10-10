@@ -2,38 +2,47 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>ADAREDI.COM — Error</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADAREDI — System Alert</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/app.css}">
     <script>
         (function () {
             try {
                 const stored = localStorage.getItem('bedsheet-theme');
-                const theme = stored === 'dark' || stored === 'light'
-                    ? stored
-                    : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                const theme = stored === 'dark' || stored === 'light' ? stored : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
                 document.documentElement.dataset.theme = theme;
                 document.documentElement.style.colorScheme = theme;
-            } catch (e) {
-                document.documentElement.style.colorScheme = 'light';
-            }
+            } catch (e) { document.documentElement.style.colorScheme = 'light'; }
         })();
     </script>
 </head>
 <body>
-<div th:replace="~{fragments/nav :: main}"></div>
-<main class="container page-shell">
-    <section class="card">
-        <h2>Something went wrong</h2>
-        <p th:if="${status}" th:text="'Status: ' + ${status}"></p>
-        <p th:if="${message}" th:text="${message}"></p>
-        <p th:unless="${message}">The page could not be loaded.</p>
-        <p>
-            <a th:href="@{/dashboard}">Dashboard</a> ·
-            <a th:href="@{/orders/new}">New order</a> ·
-            <a th:href="@{/orders}">All orders</a>
-        </p>
-    </section>
-</main>
+<div class="app-container">
+    <div th:replace="~{fragments/nav :: main}"></div>
+    
+    <div class="main-content">
+        <div th:replace="~{fragments/nav :: mobile-header}"></div>
+        
+        <main style="max-width: 600px; margin: 3rem auto; text-align: center;">
+            <div class="card" style="padding: 3rem 2rem;">
+                <div style="width: 64px; height: 64px; border-radius: var(--radius-xl); background: var(--danger-soft); color: var(--danger); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; border: 1px solid var(--danger-border);">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                </div>
+                <h1 style="font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.5rem;">Something went wrong</h1>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;" th:if="${message}" th:text="${message}"></p>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;" th:unless="${message}">The requested action could not be completed.</p>
+                
+                <div class="row wrap" style="justify-content: center; gap: 0.75rem;">
+                    <a th:href="@{/dashboard}" class="btn primary">Operations Dashboard</a>
+                    <a th:href="@{/orders}" class="btn secondary">All Orders</a>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
 <script th:src="@{/js/theme.js}"></script>
 </body>
 </html>

@@ -1,31 +1,40 @@
--- Minimal H2-compatible schema to allow the application to start when H2 fallback is used on Heroku.
--- This schema contains only the columns referenced by analytics queries and dashboard.
-
+-- H2 & MySQL compatible schema for ADAREDI.COM
 CREATE TABLE IF NOT EXISTS orders (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
-  created_at TIMESTAMP,
-  waybill_no VARCHAR(255),
-  customer_name VARCHAR(255),
-  district VARCHAR(255),
-  nearest_city VARCHAR(255),
-  cod_value DECIMAL(15,2) DEFAULT 0,
-  delivery_charge DECIMAL(15,2) DEFAULT 0,
-  gross_profit DECIMAL(15,2) DEFAULT 0,
-  net_profit DECIMAL(15,2) DEFAULT 0,
-  discount DECIMAL(15,2) DEFAULT 0
+  created_at TIMESTAMP NOT NULL,
+  waybill_no VARCHAR(50) NOT NULL UNIQUE,
+  customer_name VARCHAR(150) NOT NULL,
+  primary_phone VARCHAR(20) NOT NULL,
+  secondary_phone VARCHAR(20),
+  address VARCHAR(500) NOT NULL,
+  nearest_city VARCHAR(100) NOT NULL,
+  district VARCHAR(100) NOT NULL,
+  weight DECIMAL(10,2),
+  delivery_charge DECIMAL(12,2) DEFAULT 0 NOT NULL,
+  cod_value DECIMAL(12,2) DEFAULT 0 NOT NULL,
+  discount DECIMAL(12,2) DEFAULT 0 NOT NULL,
+  total_selling_price DECIMAL(12,2) DEFAULT 0 NOT NULL,
+  gross_profit DECIMAL(12,2) DEFAULT 0 NOT NULL,
+  net_profit DECIMAL(12,2) DEFAULT 0 NOT NULL,
+  curfox_sync_status VARCHAR(20) DEFAULT 'NOT_SYNCED' NOT NULL,
+  curfox_sync_message VARCHAR(500),
+  curfox_synced_at TIMESTAMP,
+  curfox_last_status VARCHAR(100)
 );
 
 CREATE TABLE IF NOT EXISTS order_items (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
-  order_id BIGINT,
-  bedsheet_type VARCHAR(100),
-  bed_size VARCHAR(100),
-  quantity INT DEFAULT 0,
-  line_selling_price DECIMAL(15,2) DEFAULT 0,
-  line_profit DECIMAL(15,2) DEFAULT 0,
-  CONSTRAINT fk_order_items_order FOREIGN KEY (order_id) REFERENCES orders(id)
+  order_id BIGINT NOT NULL,
+  bedsheet_type VARCHAR(10) NOT NULL,
+  bed_size VARCHAR(15) NOT NULL,
+  bedding_design VARCHAR(200) NOT NULL,
+  quantity INT DEFAULT 1 NOT NULL,
+  pillowcase_quantity INT DEFAULT 0 NOT NULL,
+  unit_selling_price DECIMAL(12,2) NOT NULL,
+  unit_profit DECIMAL(12,2) NOT NULL,
+  line_selling_price DECIMAL(12,2) NOT NULL,
+  line_profit DECIMAL(12,2) NOT NULL,
+  CONSTRAINT fk_order_items_order FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
 );
 
--- Simple index to speed up date range queries used by analytics
 CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at);
-

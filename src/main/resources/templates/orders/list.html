@@ -3,11 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADAREDI.COM - Orders</title>
+    <title>ADAREDI — All Orders</title>
+    <meta name="description" content="ADAREDI orders management and delivery tracking">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/app.css}">
     <script>
         (function () {
             try {
+                const params = new URLSearchParams(window.location.search);
+                const urlTheme = params.get('theme');
+                if (urlTheme === 'dark' || urlTheme === 'light') {
+                    try { localStorage.setItem('bedsheet-theme', urlTheme); } catch(e){}
+                }
                 const stored = localStorage.getItem('bedsheet-theme');
                 const theme = stored === 'dark' || stored === 'light'
                     ? stored
@@ -27,98 +36,143 @@
     <div class="main-content">
         <div th:replace="~{fragments/nav :: mobile-header}"></div>
         
-        <main class="container">
+        <main class="orders-page" id="main-content">
+            <!-- Header -->
             <div class="dash-header">
                 <div class="dash-header-left">
-                    <h1 class="dash-title">All orders</h1>
+                    <div class="dash-eyebrow">
+                        <span class="pulse-dot"></span>
+                        <span>Orders Ledger</span>
+                    </div>
+                    <h1 class="dash-title">All Orders</h1>
+                    <p class="dash-subtitle">View, search, dispatch, and review profitability of courier orders</p>
                 </div>
                 <div class="dash-header-right">
-                    <a class="btn primary" th:href="@{/orders/new}">+ New order</a>
+                    <a class="btn primary" th:href="@{/orders/new}">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        New Order
+                    </a>
                 </div>
             </div>
 
-            <div th:if="${#lists.isEmpty(orders)}" class="empty-state">No orders yet.</div>
+            <!-- Stats Bar -->
+            <div class="list-stats-bar" th:if="${!#lists.isEmpty(orders)}">
+                <div class="list-stat-pill">
+                    <span style="color: var(--text-muted);">Orders Count:</span>
+                    <strong th:text="${#lists.size(orders)}">0</strong>
+                </div>
+                <div class="list-stat-pill">
+                    <span style="color: var(--text-muted);">Courier Sync:</span>
+                    <strong th:if="${curfoxEnabled}" style="color: var(--success);">&#x2714; Royal Express Ready</strong>
+                    <strong th:unless="${curfoxEnabled}" style="color: var(--warning);">Manual</strong>
+                </div>
+            </div>
 
-            <div th:if="${!#lists.isEmpty(orders)}" class="record-list mobile-only">
-                <article class="card subtle record-card" th:each="o : ${orders}">
-                    <div class="row between wrap">
-                        <div>
-                            <span class="kpi-card-label">Waybill</span>
-                            <strong class="insight-big" th:text="${o.waybillNo}" style="margin:0;">WB123</strong>
+            <!-- Search and Filter Toolbar -->
+            <div class="filter-search-bar" th:if="${!#lists.isEmpty(orders)}">
+                <div class="search-input-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input type="text" id="orderSearchInput" placeholder="Quick search by waybill, customer name, phone, city or district..." autocomplete="off">
+                </div>
+                <span id="matchCounter" style="font-size: 0.82rem; color: var(--text-muted); font-weight: 600;"></span>
+            </div>
+
+            <div th:if="${#lists.isEmpty(orders)}" class="empty-state">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="margin-bottom: 1rem; color: var(--text-muted);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                <h3 style="margin-bottom: 0.5rem; color: var(--text-main);">No orders found</h3>
+                <p style="margin-bottom: 1.5rem;">Start by creating your first courier shipment and tracking profit.</p>
+                <a th:href="@{/orders/new}" class="btn primary">+ Create Order</a>
+            </div>
+
+            <!-- Mobile Record Cards -->
+            <div th:if="${!#lists.isEmpty(orders)}" class="record-list mobile-only" id="mobileOrdersList">
+                <article class="card record-card" th:each="o : ${orders}" style="margin-bottom: 1rem;" th:attr="data-search=${o.waybillNo + ' ' + o.customerName + ' ' + o.primaryPhone + ' ' + o.nearestCity + ' ' + o.district}">
+                    <div class="row between wrap" style="margin-bottom: 0.75rem;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span class="customer-avatar" th:text="${#strings.substring(o.customerName, 0, 1)}">C</span>
+                            <div>
+                                <span class="badge" style="background: var(--primary-soft); color: var(--primary); font-weight: 700;" th:text="${o.waybillNo}">WB123</span>
+                                <span class="hint" style="display: block; margin: 0.1rem 0 0;" th:text="${#temporals.format(o.createdAt, 'MMM dd, yyyy HH:mm')}"></span>
+                            </div>
                         </div>
                         <span class="badge" th:if="${curfoxEnabled}" th:classappend="' badge-' + ${o.curfoxSyncStatus.name()}"
                               th:text="${o.curfoxSyncStatus}"></span>
                     </div>
-                    <div class="record-grid">
-                        <div class="record-field">
-                            <span class="record-label">Date</span>
-                            <span class="record-value" th:text="${#temporals.format(o.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
-                        </div>
-                        <div class="record-field">
-                            <span class="record-label">Customer</span>
-                            <span class="record-value" th:text="${o.customerName}"></span>
-                        </div>
-                        <div class="record-field">
-                            <span class="record-label">Phone</span>
-                            <span class="record-value" th:text="${o.primaryPhone}"></span>
-                        </div>
-                        <div class="record-field">
-                            <span class="record-label">Items</span>
-                            <span class="record-value" th:text="${#lists.size(o.items)}"></span>
-                        </div>
-                        <div class="record-field">
-                            <span class="record-label">Selling</span>
-                            <span class="record-value" th:text="'LKR ' + ${o.totalSellingPrice}"></span>
-                        </div>
-                        <div class="record-field">
-                            <span class="record-label">Net profit</span>
-                            <span class="record-value profit-cell" th:text="'LKR ' + ${o.netProfit}"></span>
+
+                    <div style="padding: 0.75rem 0; border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle); margin: 0.5rem 0;">
+                        <strong style="font-size: 1rem; color: var(--text-main);" th:text="${o.customerName}">Customer Name</strong>
+                        <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem;">
+                            <span th:text="${o.primaryPhone}"></span> &bull; <span th:text="${o.nearestCity} + ', ' + ${o.district}"></span>
                         </div>
                     </div>
+
+                    <div class="row between" style="margin-top: 0.75rem; font-size: 0.9rem;">
+                        <div>
+                            <span class="hint" style="margin: 0; display: block;">Selling</span>
+                            <strong th:text="'LKR ' + ${#numbers.formatDecimal(o.totalSellingPrice, 0, 'COMMA', 0, 'POINT')}"></strong>
+                        </div>
+                        <div style="text-align: right;">
+                            <span class="hint" style="margin: 0; display: block;">Net Profit</span>
+                            <strong class="profit-cell" style="font-size: 1.1rem;" th:text="'LKR ' + ${#numbers.formatDecimal(o.netProfit, 0, 'COMMA', 0, 'POINT')}"></strong>
+                        </div>
+                    </div>
+
                     <div class="row wrap" style="margin-top: 1rem;">
-                        <a class="btn secondary" th:href="@{/orders/{id}(id=${o.id})}" style="flex:1;">View order</a>
-                        <form method="post" th:action="@{/orders/{id}/delete(id=${o.id})}" style="display:inline; flex:1;" onsubmit="return confirm('Are you sure you want to delete this order?');">
+                        <a class="btn secondary" th:href="@{/orders/{id}(id=${o.id})}" style="flex: 1;">View Details</a>
+                        <form method="post" th:action="@{/orders/{id}/delete(id=${o.id})}" style="display:inline; flex: 1;" onsubmit="return confirm('Are you sure you want to delete this order?');">
                             <button type="submit" class="btn subtle" style="width: 100%;">Delete</button>
                         </form>
                     </div>
                 </article>
             </div>
 
-            <div class="desktop-only table-wrap" th:if="${!#lists.isEmpty(orders)}">
-                <table class="data-table">
+            <!-- Desktop Modern Table -->
+            <div class="desktop-only table-wrap" th:if="${!#lists.isEmpty(orders)}" style="margin-top: 0.5rem;">
+                <table class="data-table" id="desktopOrdersTable">
                     <thead>
                     <tr>
-                        <th>Date</th>
+                        <th>Date &amp; Time</th>
                         <th>Waybill</th>
                         <th>Customer</th>
                         <th>Phone</th>
-                        <th>Items</th>
-                        <th>Selling</th>
-                        <th>Net profit</th>
-                        <th th:if="${curfoxEnabled}">Courier</th>
-                        <th></th>
+                        <th>Destination</th>
+                        <th style="text-align: center;">Items</th>
+                        <th style="text-align: right;">Selling Price</th>
+                        <th style="text-align: right;">Net Profit</th>
+                        <th th:if="${curfoxEnabled}" style="text-align: center;">Courier</th>
+                        <th style="text-align: right;">Actions</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="o : ${orders}">
-                        <td th:text="${#temporals.format(o.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
-                        <td th:text="${o.waybillNo}" style="font-weight: 600;"></td>
-                        <td th:text="${o.customerName}"></td>
-                        <td th:text="${o.primaryPhone}"></td>
-                        <td th:text="${#lists.size(o.items)}"></td>
-                        <td th:text="'LKR ' + ${o.totalSellingPrice}"></td>
-                        <td class="profit-cell" th:text="'LKR ' + ${o.netProfit}"></td>
-                        <td th:if="${curfoxEnabled}">
-                            <span class="badge" th:classappend="' badge-' + ${o.curfoxSyncStatus.name()}"
-                                  th:text="${o.curfoxSyncStatus}"></span>
+                    <tr th:each="o : ${orders}" th:attr="data-search=${o.waybillNo + ' ' + o.customerName + ' ' + o.primaryPhone + ' ' + o.nearestCity + ' ' + o.district}">
+                        <td th:text="${#temporals.format(o.createdAt, 'MMM dd, yyyy HH:mm')}" style="color: var(--text-muted); font-size: 0.82rem; white-space: nowrap;"></td>
+                        <td>
+                            <a th:href="@{/orders/{id}(id=${o.id})}" class="badge" style="background: var(--primary-soft); color: var(--primary); border-color: var(--primary-soft-border); font-weight: 800; font-family: monospace; font-size: 0.85rem;" th:text="${o.waybillNo}">WB123</a>
                         </td>
                         <td>
-                            <div style="display: flex; gap: 0.5rem; align-items: center; justify-content: flex-end;">
-                                <a th:href="@{/orders/{id}(id=${o.id})}" class="btn secondary" style="padding: 0.25rem 0.75rem; font-size: 0.8rem;">View</a>
-                                <form method="post" th:action="@{/orders/{id}/delete(id=${o.id})}" style="display:inline; margin:0;" onsubmit="return confirm('Delete this order? This action cannot be undone.');">
-                                    <button type="submit" class="delete-button">Delete</button>
-                                </form>
+                            <div style="display: flex; align-items: center;">
+                                <span class="customer-avatar" th:text="${#strings.substring(o.customerName, 0, 1)}">A</span>
+                                <strong th:text="${o.customerName}">Customer Name</strong>
                             </div>
+                        </td>
+                        <td th:text="${o.primaryPhone}" style="color: var(--text-muted); font-size: 0.85rem;"></td>
+                        <td>
+                            <strong th:text="${o.nearestCity}"></strong>
+                            <span class="district-tag" th:text="${o.district}" style="display: inline-block; margin-left: 0.25rem;"></span>
+                        </td>
+                        <td style="text-align: center;">
+                            <span class="badge" th:text="${#lists.size(o.items)} + ' items'"></span>
+                        </td>
+                        <td style="text-align: right; font-weight: 700;" th:text="'LKR ' + ${#numbers.formatDecimal(o.totalSellingPrice, 0, 'COMMA', 0, 'POINT')}"></td>
+                        <td class="profit-cell" style="text-align: right; font-size: 0.95rem;" th:text="'LKR ' + ${#numbers.formatDecimal(o.netProfit, 0, 'COMMA', 0, 'POINT')}"></td>
+                        <td th:if="${curfoxEnabled}" style="text-align: center;">
+                            <span class="badge" th:classappend="' badge-' + ${o.curfoxSyncStatus.name()}" th:text="${o.curfoxSyncStatus}"></span>
+                        </td>
+                        <td style="text-align: right; white-space: nowrap;">
+                            <a class="btn secondary" th:href="@{/orders/{id}(id=${o.id})}" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">View</a>
+                            <form method="post" th:action="@{/orders/{id}/delete(id=${o.id})}" style="display:inline; margin-left: 0.35rem;" onsubmit="return confirm('Are you sure you want to delete this order?');">
+                                <button type="submit" class="btn subtle" style="padding: 0.35rem 0.5rem; font-size: 0.8rem;">Delete</button>
+                            </form>
                         </td>
                     </tr>
                     </tbody>
@@ -130,13 +184,45 @@
 
 <script th:src="@{/js/theme.js}"></script>
 <script>
-    // For sidebar nav items to be marked active dynamically based on URL (simple method)
-    const currentPath = window.location.pathname;
+    // Highlight Active Link
     document.querySelectorAll('.nav-link').forEach(link => {
-        if(currentPath.includes(link.getAttribute('href'))) {
+        if (link.getAttribute('href') === '/orders') {
             link.classList.add('active');
         }
     });
+
+    // Real-time client-side search filter
+    const searchInput = document.getElementById('orderSearchInput');
+    const tableRows = document.querySelectorAll('#desktopOrdersTable tbody tr');
+    const mobileCards = document.querySelectorAll('#mobileOrdersList .record-card');
+    const matchCounter = document.getElementById('matchCounter');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            const query = this.value.trim().toLowerCase();
+            let matched = 0;
+
+            tableRows.forEach(row => {
+                const text = (row.getAttribute('data-search') || '').toLowerCase();
+                const show = text.includes(query);
+                row.style.display = show ? '' : 'none';
+                if (show) matched++;
+            });
+
+            mobileCards.forEach(card => {
+                const text = (card.getAttribute('data-search') || '').toLowerCase();
+                card.style.display = text.includes(query) ? '' : 'none';
+            });
+
+            if (matchCounter) {
+                if (query.length > 0) {
+                    matchCounter.textContent = `${matched} matching order${matched === 1 ? '' : 's'}`;
+                } else {
+                    matchCounter.textContent = '';
+                }
+            }
+        });
+    }
 </script>
 </body>
 </html>

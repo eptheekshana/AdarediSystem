@@ -3,15 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADAREDI.COM — Dashboard</title>
-    <meta name="description" content="ADAREDI.COM orders and profit analytics dashboard">
+    <title>ADAREDI — Operations Dashboard</title>
+    <meta name="description" content="ADAREDI orders and profit analytics dashboard">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/app.css}">
     <script>
         (function () {
             try {
+                const params = new URLSearchParams(window.location.search);
+                const urlTheme = params.get('theme');
+                if (urlTheme === 'dark' || urlTheme === 'light') {
+                    try { localStorage.setItem('bedsheet-theme', urlTheme); } catch(e){}
+                }
                 const stored = localStorage.getItem('bedsheet-theme');
                 const theme = stored === 'dark' || stored === 'light' ? stored : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
                 document.documentElement.dataset.theme = theme;
@@ -23,23 +28,28 @@
 <body>
 <div class="app-container">
     <div th:replace="~{fragments/nav :: main}"></div>
+    
     <div class="main-content">
         <div th:replace="~{fragments/nav :: mobile-header}"></div>
+        
         <main class="dashboard" id="main-content">
 
             <!-- Page Header -->
             <div class="dash-header">
                 <div class="dash-header-left">
-                    <div class="dash-eyebrow"><span class="pulse-dot"></span>Live Analytics</div>
+                    <div class="dash-eyebrow">
+                        <span class="pulse-dot"></span>
+                        <span>Live Analytics &bull; Operational</span>
+                    </div>
                     <h1 class="dash-title">Operations Dashboard</h1>
-                    <p class="dash-subtitle">Real-time view of orders, revenue &amp; profitability for ADAREDI.COM</p>
+                    <p class="dash-subtitle">Real-time tracking of orders, revenue metrics, and profit margins</p>
                 </div>
                 <div class="dash-header-right">
                     <div class="period-filter-group" role="group" aria-label="Time period">
-                        <a th:href="@{/dashboard(days=7)}" th:classappend="${periodDays == 7} ? ' active' : ''" id="filter-7d">7d</a>
-                        <a th:href="@{/dashboard(days=30)}" th:classappend="${periodDays == 30} ? ' active' : ''" id="filter-30d">30d</a>
-                        <a th:href="@{/dashboard(days=90)}" th:classappend="${periodDays == 90} ? ' active' : ''" id="filter-90d">90d</a>
-                        <a th:href="@{/dashboard(days=0)}" th:classappend="${periodDays == 0} ? ' active' : ''" id="filter-all">All</a>
+                        <a th:href="@{/dashboard(days=7)}" th:classappend="${periodDays == 7} ? ' active' : ''" id="filter-7d">7 Days</a>
+                        <a th:href="@{/dashboard(days=30)}" th:classappend="${periodDays == 30} ? ' active' : ''" id="filter-30d">30 Days</a>
+                        <a th:href="@{/dashboard(days=90)}" th:classappend="${periodDays == 90} ? ' active' : ''" id="filter-90d">90 Days</a>
+                        <a th:href="@{/dashboard(days=0)}" th:classappend="${periodDays == 0} ? ' active' : ''" id="filter-all">All Time</a>
                     </div>
                 </div>
             </div>
@@ -47,53 +57,76 @@
             <!-- KPI Cards -->
             <section class="kpi-row" aria-label="Key performance indicators">
                 <article class="kpi-card kpi-card--primary">
-                    <div class="kpi-card-icon kpi-icon--blue">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                    <div class="kpi-card-header">
+                        <div class="kpi-card-icon kpi-icon--blue">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                        </div>
+                        <span class="badge">Volume</span>
                     </div>
                     <div class="kpi-card-body">
                         <span class="kpi-card-label">Total Orders</span>
                         <strong class="kpi-card-value" th:text="${dashboard.totalOrders}">0</strong>
                     </div>
                 </article>
+
                 <article class="kpi-card kpi-card--green">
-                    <div class="kpi-card-icon kpi-icon--green">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 1v22M5 6h14M5 18h14"/></svg>
+                    <div class="kpi-card-header">
+                        <div class="kpi-card-icon kpi-icon--green">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                        </div>
+                        <span class="badge badge-SYNCED">Gross Rev</span>
                     </div>
                     <div class="kpi-card-body">
                         <span class="kpi-card-label">Revenue (LKR)</span>
                         <strong class="kpi-card-value" th:text="${#numbers.formatDecimal(dashboard.totalRevenue, 0, 'COMMA', 0, 'POINT')}">0</strong>
                     </div>
                 </article>
+
                 <article class="kpi-card kpi-card--purple">
-                    <div class="kpi-card-icon kpi-icon--purple">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/></svg>
+                    <div class="kpi-card-header">
+                        <div class="kpi-card-icon kpi-icon--purple">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 6l-9.5 9.5-5-5L1 18"></path><path d="M17 6h6v6"></path></svg>
+                        </div>
+                        <span class="badge" style="background: rgba(139, 92, 246, 0.12); color: #8b5cf6; border-color: rgba(139, 92, 246, 0.25);">Net Gain</span>
                     </div>
                     <div class="kpi-card-body">
                         <span class="kpi-card-label">Net Profit (LKR)</span>
-                        <strong class="kpi-card-value" th:text="${#numbers.formatDecimal(dashboard.netProfit, 0, 'COMMA', 0, 'POINT')}">0</strong>
+                        <strong class="kpi-card-value" style="color: var(--success);" th:text="${#numbers.formatDecimal(dashboard.netProfit, 0, 'COMMA', 0, 'POINT')}">0</strong>
                     </div>
                 </article>
+
                 <article class="kpi-card kpi-card--amber">
-                    <div class="kpi-card-icon kpi-icon--amber">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg>
+                    <div class="kpi-card-header">
+                        <div class="kpi-card-icon kpi-icon--amber">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        </div>
+                        <span class="badge badge-NOT_SYNCED">Gross</span>
                     </div>
                     <div class="kpi-card-body">
                         <span class="kpi-card-label">Gross Profit (LKR)</span>
                         <strong class="kpi-card-value" th:text="${#numbers.formatDecimal(dashboard.grossProfit, 0, 'COMMA', 0, 'POINT')}">0</strong>
                     </div>
                 </article>
+
                 <article class="kpi-card kpi-card--teal">
-                    <div class="kpi-card-icon kpi-icon--teal">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                    <div class="kpi-card-header">
+                        <div class="kpi-card-icon kpi-icon--teal">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                        </div>
+                        <span class="badge">Units</span>
                     </div>
                     <div class="kpi-card-body">
                         <span class="kpi-card-label">Items Sold</span>
                         <strong class="kpi-card-value" th:text="${dashboard.totalItems}">0</strong>
                     </div>
                 </article>
+
                 <article class="kpi-card kpi-card--rose">
-                    <div class="kpi-card-icon kpi-icon--rose">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+                    <div class="kpi-card-header">
+                        <div class="kpi-card-icon kpi-icon--rose">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M14.83 14.83a4 4 0 1 1 0-5.66"></path></svg>
+                        </div>
+                        <span class="badge">AOV</span>
                     </div>
                     <div class="kpi-card-body">
                         <span class="kpi-card-label">Avg Order (LKR)</span>
@@ -107,19 +140,20 @@
                 <div class="chart-card chart-card--wide">
                     <div class="chart-card-header">
                         <div>
-                            <h2 class="chart-card-title">Revenue &amp; Profit Trend</h2>
-                            <p class="chart-card-sub">Daily revenue vs net profit</p>
+                            <h2 class="chart-card-title">Revenue &amp; Profit Trajectory</h2>
+                            <p class="chart-card-sub">Daily comparison of gross customer billings vs net earnings</p>
                         </div>
                     </div>
                     <div class="chart-wrap">
                         <canvas id="revenueChart" aria-label="Revenue and profit trend chart"></canvas>
                     </div>
                 </div>
+
                 <div class="chart-card">
                     <div class="chart-card-header">
                         <div>
                             <h2 class="chart-card-title">Product Mix</h2>
-                            <p class="chart-card-sub">Units sold by type</p>
+                            <p class="chart-card-sub">Distribution of Flat vs Fitted bedsheet units</p>
                         </div>
                     </div>
                     <div class="chart-wrap chart-wrap--donut">
@@ -132,7 +166,7 @@
             <section class="bento-grid" aria-label="Current month overview">
                 <div class="bento-block bento-block--wide card">
                     <div class="block-header">
-                        <span class="block-tag">This Month</span>
+                        <span class="block-tag">Current Performance</span>
                         <h2 class="block-title">Monthly Snapshot</h2>
                     </div>
                     <div class="month-metrics">
@@ -162,32 +196,36 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="bento-block card insight-tile">
-                    <span class="insight-icon">📍</span>
+                    <div class="insight-icon">📍</div>
                     <div>
                         <span class="block-tag">Top District</span>
                         <strong class="insight-big" th:text="${dashboard.currentMonthTopDistrict != null ? dashboard.currentMonthTopDistrict : '—'}">—</strong>
                         <p class="insight-sub" th:if="${!#lists.isEmpty(dashboard.byDistrict)}" th:text="'LKR ' + ${#numbers.formatDecimal(dashboard.byDistrict[0].profit, 0, 'COMMA', 0, 'POINT')} + ' profit'">Profit</p>
                     </div>
                 </div>
+
                 <div class="bento-block card insight-tile">
-                    <span class="insight-icon">🏙️</span>
+                    <div class="insight-icon">🏙️</div>
                     <div>
                         <span class="block-tag">Top City</span>
                         <strong class="insight-big" th:text="${dashboard.currentMonthTopCity != null ? dashboard.currentMonthTopCity : '—'}">—</strong>
                         <p class="insight-sub" th:if="${!#lists.isEmpty(dashboard.byCity)}" th:text="'LKR ' + ${#numbers.formatDecimal(dashboard.byCity[0].profit, 0, 'COMMA', 0, 'POINT')} + ' profit'">Profit</p>
                     </div>
                 </div>
+
                 <div class="bento-block card insight-tile">
-                    <span class="insight-icon">🛏️</span>
+                    <div class="insight-icon">🛏️</div>
                     <div>
                         <span class="block-tag">Best Product</span>
                         <strong class="insight-big" th:text="${dashboard.currentMonthBestProductType != null ? dashboard.currentMonthBestProductType : '—'}">—</strong>
                         <p class="insight-sub" th:if="${!#lists.isEmpty(dashboard.byBedsheetType)}" th:text="${dashboard.byBedsheetType[0].quantity} + ' units sold'">Units</p>
                     </div>
                 </div>
+
                 <div class="bento-block card insight-tile">
-                    <span class="insight-icon">📐</span>
+                    <div class="insight-icon">📐</div>
                     <div>
                         <span class="block-tag">Top Bed Size</span>
                         <strong class="insight-big" th:text="${dashboard.currentMonthTopBedSize != null ? dashboard.currentMonthTopBedSize : '—'}">—</strong>
@@ -202,21 +240,23 @@
                     <div class="chart-card-header">
                         <div>
                             <h2 class="chart-card-title">Districts by Profit</h2>
-                            <p class="chart-card-sub">Top districts ranked by net profit</p>
+                            <p class="chart-card-sub">Top operational districts generating highest margins</p>
                         </div>
                     </div>
                     <div class="chart-wrap">
                         <canvas id="districtChart" aria-label="District profit bar chart"></canvas>
                     </div>
                 </div>
-                <div class="chart-card chart-card--wide">
+
+                <div class="chart-card">
                     <div class="chart-card-header">
                         <div>
-                            <h2 class="chart-card-title">Recent Orders</h2>
-                            <p class="chart-card-sub">Latest transactions in this period</p>
+                            <h2 class="chart-card-title">Recent Transactions</h2>
+                            <p class="chart-card-sub">Latest customer dispatches and profit outcomes</p>
                         </div>
+                        <a th:href="@{/orders}" class="btn secondary" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;">View All</a>
                     </div>
-                    <p class="empty-state" th:if="${#lists.isEmpty(dashboard.recentOrders)}">No orders in this period.</p>
+                    <p class="empty-state" th:if="${#lists.isEmpty(dashboard.recentOrders)}">No orders recorded in this period.</p>
                     <div class="table-wrap" th:if="${!#lists.isEmpty(dashboard.recentOrders)}">
                         <table class="data-table">
                             <thead>
@@ -224,18 +264,20 @@
                                 <th>Date</th>
                                 <th>Waybill</th>
                                 <th>Customer</th>
-                                <th>Profit</th>
+                                <th style="text-align: right;">Net Profit</th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr th:each="o : ${dashboard.recentOrders}">
-                                <td th:text="${#temporals.format(o.createdAt, 'MMM dd')}"></td>
-                                <td><a th:href="@{/orders/{id}(id=${o.id})}" th:text="${o.waybillNo}" class="table-link"></a></td>
+                                <td th:text="${#temporals.format(o.createdAt, 'MMM dd, HH:mm')}" style="color: var(--text-muted); font-size: 0.8rem;"></td>
                                 <td>
-                                    <span th:text="${o.customerName}"></span>
-                                    <br><span class="district-tag" th:text="${o.district}" style="display:inline-block;margin-top:.25rem;"></span>
+                                    <a th:href="@{/orders/{id}(id=${o.id})}" th:text="${o.waybillNo}" class="badge" style="background: var(--primary-soft); color: var(--primary); border-color: var(--primary-soft-border); font-weight: 700;"></a>
                                 </td>
-                                <td class="profit-cell" th:text="${#numbers.formatDecimal(o.netProfit, 0, 'COMMA', 0, 'POINT')}"></td>
+                                <td>
+                                    <strong th:text="${o.customerName}"></strong>
+                                    <span class="district-tag" th:text="${o.district}" style="display:inline-block; margin-left: 0.35rem;"></span>
+                                </td>
+                                <td class="profit-cell" style="text-align: right; font-size: 0.95rem;" th:text="'LKR ' + ${#numbers.formatDecimal(o.netProfit, 0, 'COMMA', 0, 'POINT')}"></td>
                             </tr>
                             </tbody>
                         </table>
@@ -243,122 +285,46 @@
                 </div>
             </section>
 
-            <!-- Analytics Grid -->
-            <section class="analytics-grid" aria-label="Analytics breakdown">
-                <article class="table-card">
-                    <div class="table-card-header">
-                        <h2 class="table-card-title">Daily Analysis</h2>
-                        <p class="table-card-sub">Per-day orders, revenue &amp; profitability</p>
-                    </div>
-                    <div class="table-wrap">
-                        <table class="data-table">
-                            <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Orders</th>
-                                <th>Revenue</th>
-                                <th>Net Profit</th>
-                                <th>Margin %</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr th:each="d : ${dashboard.dailyTrend}">
-                                <td th:text="${#temporals.format(d.date, 'MMM dd, yyyy')}">—</td>
-                                <td th:text="${d.orderCount}">0</td>
-                                <td th:text="${#numbers.formatDecimal(d.revenue, 0, 'COMMA', 0, 'POINT')}">0</td>
-                                <td class="profit-cell" th:text="${#numbers.formatDecimal(d.netProfit, 0, 'COMMA', 0, 'POINT')}">0</td>
-                                <td><span class="margin-badge" th:text="${#numbers.formatDecimal(d.profitMarginPercent, 1, 'COMMA', 1, 'POINT')} + '%'">0%</span></td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </article>
-                <article class="table-card">
-                    <div class="table-card-header">
-                        <h2 class="table-card-title">Cities by Profit</h2>
-                    </div>
-                    <p class="empty-state" th:if="${#lists.isEmpty(dashboard.byCity)}">No data yet.</p>
-                    <div class="table-wrap" th:if="${!#lists.isEmpty(dashboard.byCity)}">
-                        <table class="data-table">
-                            <thead><tr><th>City</th><th>Orders</th><th>Profit</th></tr></thead>
-                            <tbody>
-                            <tr th:each="c : ${dashboard.byCity}">
-                                <td th:text="${c.label}"></td>
-                                <td th:text="${c.count}"></td>
-                                <td class="profit-cell" th:text="${#numbers.formatDecimal(c.profit, 0, 'COMMA', 0, 'POINT')}"></td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </article>
-                <article class="table-card">
-                    <div class="table-card-header"><h2 class="table-card-title">Product Mix</h2></div>
-                    <p class="empty-state" th:if="${#lists.isEmpty(dashboard.byBedsheetType)}">No data yet.</p>
-                    <div class="table-wrap" th:if="${!#lists.isEmpty(dashboard.byBedsheetType)}">
-                        <table class="data-table">
-                            <thead><tr><th>Type</th><th>Qty</th><th>Profit</th></tr></thead>
-                            <tbody>
-                            <tr th:each="t : ${dashboard.byBedsheetType}">
-                                <td th:text="${t.type}"></td>
-                                <td th:text="${t.quantity}"></td>
-                                <td class="profit-cell" th:text="${#numbers.formatDecimal(t.profit, 0, 'COMMA', 0, 'POINT')}"></td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </article>
-                <article class="table-card">
-                    <div class="table-card-header"><h2 class="table-card-title">Units by Bed Size</h2></div>
-                    <p class="empty-state" th:if="${#lists.isEmpty(dashboard.byBedSize)}">No data yet.</p>
-                    <div class="table-wrap" th:if="${!#lists.isEmpty(dashboard.byBedSize)}">
-                        <table class="data-table">
-                            <thead><tr><th>Size</th><th>Units</th><th>Profit</th></tr></thead>
-                            <tbody>
-                            <tr th:each="s : ${dashboard.byBedSize}">
-                                <td th:text="${s.label}"></td>
-                                <td th:text="${s.count}"></td>
-                                <td class="profit-cell" th:text="${#numbers.formatDecimal(s.profit, 0, 'COMMA', 0, 'POINT')}"></td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </article>
-            </section>
-
-            <!-- Top Selling Designs -->
+            <!-- Top Selling Designs Podium & Leaderboard -->
             <section class="design-analysis-section" th:if="${!#lists.isEmpty(dashboard.byBeddingDesign)}">
                 <div class="section-head">
                     <div>
+                        <span class="block-tag">Bestsellers</span>
                         <h3>Top Selling Bedsheet Designs</h3>
                     </div>
                 </div>
+                
                 <div class="design-podium">
                     <th:block th:each="d, stat : ${dashboard.byBeddingDesign}" th:if="${stat.index < 3}">
-                        <article th:class="'card design-podium-card rank-' + (${stat.index + 1})">
+                        <article th:class="'design-podium-card rank-' + (${stat.index + 1})">
                             <div class="podium-rank-badge" th:text="${stat.index == 0 ? '🥇' : stat.index == 1 ? '🥈' : '🥉'}">🥇</div>
                             <div class="podium-design-name" th:text="${d.design}">Design Name</div>
                             <div class="podium-metrics">
                                 <div class="podium-metric">
                                     <span class="podium-metric-val" th:text="${d.quantity}">0</span>
-                                    <span class="podium-metric-label">Units sold</span>
+                                    <span class="podium-metric-label">Units Sold</span>
                                 </div>
                                 <div class="podium-metric">
-                                    <span class="podium-metric-val" th:text="${#numbers.formatDecimal(d.profit, 0, 'COMMA', 0, 'POINT')}">0</span>
-                                    <span class="podium-metric-label">Profit (LKR)</span>
+                                    <span class="podium-metric-val profit-cell" th:text="'LKR ' + ${#numbers.formatDecimal(d.profit, 0, 'COMMA', 0, 'POINT')}">0</span>
+                                    <span class="podium-metric-label">Profit</span>
                                 </div>
                             </div>
                         </article>
                     </th:block>
                 </div>
+
                 <article class="table-card">
-                    <div class="table-card-header"><h2 class="table-card-title">Design Leaderboard</h2></div>
+                    <div class="table-card-header">
+                        <h2 class="table-card-title">Design Leaderboard</h2>
+                        <p class="table-card-sub">Ranked performance breakdown across all prints and patterns</p>
+                    </div>
                     <div class="table-wrap">
                         <div class="design-leaderboard">
                             <th:block th:with="maxQty=${dashboard.byBeddingDesign[0].quantity}">
                                 <div class="design-leaderboard-row dl-header">
                                     <span class="dl-rank">Rank</span>
-                                    <span class="dl-name">Design</span>
-                                    <span class="dl-bar"></span>
+                                    <span class="dl-name">Pattern / Design</span>
+                                    <span class="dl-bar">Market Share</span>
                                     <span class="dl-qty">Units</span>
                                     <span class="dl-revenue">Revenue (LKR)</span>
                                     <span class="dl-profit">Profit (LKR)</span>
@@ -382,14 +348,106 @@
                 </article>
             </section>
 
-            <section th:if="${#lists.isEmpty(dashboard.byBeddingDesign)}" style="margin-top:2rem">
-                <article class="empty-state"><p>No design data available for the selected period.</p></article>
+            <!-- Detailed Analytics Grid -->
+            <section class="analytics-grid" aria-label="Analytics breakdown">
+                <article class="table-card">
+                    <div class="table-card-header">
+                        <h2 class="table-card-title">Daily Margin Breakdown</h2>
+                        <p class="table-card-sub">Per-day order count, revenue &amp; net margin %</p>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Orders</th>
+                                <th>Revenue</th>
+                                <th>Net Profit</th>
+                                <th>Margin</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="d : ${dashboard.dailyTrend}">
+                                <td th:text="${#temporals.format(d.date, 'MMM dd, yyyy')}" style="font-weight: 600;">—</td>
+                                <td th:text="${d.orderCount}">0</td>
+                                <td th:text="${#numbers.formatDecimal(d.revenue, 0, 'COMMA', 0, 'POINT')}">0</td>
+                                <td class="profit-cell" th:text="${#numbers.formatDecimal(d.netProfit, 0, 'COMMA', 0, 'POINT')}">0</td>
+                                <td><span class="margin-badge" th:text="${#numbers.formatDecimal(d.profitMarginPercent, 1, 'COMMA', 1, 'POINT')} + '%'">0%</span></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+
+                <article class="table-card">
+                    <div class="table-card-header">
+                        <h2 class="table-card-title">Cities by Profit</h2>
+                        <p class="table-card-sub">Courier destination hubs ranked by returns</p>
+                    </div>
+                    <p class="empty-state" th:if="${#lists.isEmpty(dashboard.byCity)}">No data recorded.</p>
+                    <div class="table-wrap" th:if="${!#lists.isEmpty(dashboard.byCity)}">
+                        <table class="data-table">
+                            <thead><tr><th>Destination City</th><th>Orders</th><th style="text-align:right;">Net Profit</th></tr></thead>
+                            <tbody>
+                            <tr th:each="c : ${dashboard.byCity}">
+                                <td><strong th:text="${c.label}"></strong></td>
+                                <td th:text="${c.count}"></td>
+                                <td class="profit-cell" style="text-align:right;" th:text="'LKR ' + ${#numbers.formatDecimal(c.profit, 0, 'COMMA', 0, 'POINT')}"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+
+                <article class="table-card">
+                    <div class="table-card-header">
+                        <h2 class="table-card-title">Product Categories</h2>
+                        <p class="table-card-sub">Volume and profitability by style</p>
+                    </div>
+                    <p class="empty-state" th:if="${#lists.isEmpty(dashboard.byBedsheetType)}">No data recorded.</p>
+                    <div class="table-wrap" th:if="${!#lists.isEmpty(dashboard.byBedsheetType)}">
+                        <table class="data-table">
+                            <thead><tr><th>Type</th><th>Qty</th><th style="text-align:right;">Profit</th></tr></thead>
+                            <tbody>
+                            <tr th:each="t : ${dashboard.byBedsheetType}">
+                                <td><span class="badge" th:text="${t.type}"></span></td>
+                                <td th:text="${t.quantity} + ' units'"></td>
+                                <td class="profit-cell" style="text-align:right;" th:text="'LKR ' + ${#numbers.formatDecimal(t.profit, 0, 'COMMA', 0, 'POINT')}"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+
+                <article class="table-card">
+                    <div class="table-card-header">
+                        <h2 class="table-card-title">Units by Bed Size</h2>
+                        <p class="table-card-sub">Size demand breakdown</p>
+                    </div>
+                    <p class="empty-state" th:if="${#lists.isEmpty(dashboard.byBedSize)}">No data recorded.</p>
+                    <div class="table-wrap" th:if="${!#lists.isEmpty(dashboard.byBedSize)}">
+                        <table class="data-table">
+                            <thead><tr><th>Size</th><th>Units Sold</th><th style="text-align:right;">Profit</th></tr></thead>
+                            <tbody>
+                            <tr th:each="s : ${dashboard.byBedSize}">
+                                <td><strong th:text="${s.label}"></strong></td>
+                                <td th:text="${s.count}"></td>
+                                <td class="profit-cell" style="text-align:right;" th:text="'LKR ' + ${#numbers.formatDecimal(s.profit, 0, 'COMMA', 0, 'POINT')}"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
             </section>
 
             <footer class="dash-footer">
-                <span>Revenue = COD value − delivery charge</span>
-                <span th:if="${periodDays > 0}" th:text="'Showing last ' + ${periodDays} + ' days'"></span>
-                <span th:if="${periodDays == 0}">Showing all-time data</span>
+                <div>
+                    <strong>ADAREDI Operations</strong> &bull; Fixed price list calculation &bull; Royal Express integrated
+                </div>
+                <div>
+                    <span th:if="${periodDays > 0}" th:text="'Filtered for past ' + ${periodDays} + ' days'"></span>
+                    <span th:if="${periodDays == 0}">Displaying all historical data</span>
+                </div>
             </footer>
         </main>
     </div>
@@ -416,5 +474,13 @@
 <script th:src="@{/js/theme.js}"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script th:src="@{/js/dashboard.js}"></script>
+<script>
+    const currentPath = window.location.pathname;
+    document.querySelectorAll('.nav-link').forEach(link => {
+        if (link.getAttribute('href') === '/dashboard' || currentPath === '/dashboard') {
+            link.classList.add('active');
+        }
+    });
+</script>
 </body>
 </html>
