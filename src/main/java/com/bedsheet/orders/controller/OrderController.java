@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bedsheet.orders.dto.PricingRuleUpdateDto;
+import org.springframework.web.bind.annotation.PutMapping;
+
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
@@ -33,7 +36,22 @@ public class OrderController {
     public Map<String, Object> pricing() {
         return Map.of(
                 "sellingPrices", pricingService.getAllSellingPrices(),
-                "unitProfits", pricingService.getAllUnitProfits());
+                "unitProfits", pricingService.getAllUnitProfits(),
+                "pillowcaseSellingPrice", pricingService.getPillowcaseSellingPrice(),
+                "pillowcaseUnitProfit", pricingService.getPillowcaseUnitProfit(),
+                "rules", pricingService.getAllRules());
+    }
+
+    @PutMapping("/pricing")
+    public Map<String, Object> updatePricing(@RequestBody List<PricingRuleUpdateDto> updates) {
+        pricingService.updateRules(updates);
+        return pricing();
+    }
+
+    @PostMapping("/pricing/reset")
+    public Map<String, Object> resetPricing() {
+        pricingService.resetToDefaults();
+        return pricing();
     }
 
     @GetMapping

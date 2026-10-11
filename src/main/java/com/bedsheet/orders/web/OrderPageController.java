@@ -198,6 +198,8 @@ public class OrderPageController {
                 objectMapper.writeValueAsString(pricingService.getSellingPricesForJson()));
         model.addAttribute("unitProfitsJson",
                 objectMapper.writeValueAsString(pricingService.getUnitProfitsForJson()));
+        model.addAttribute("pillowcasePrice", pricingService.getPillowcaseSellingPrice());
+        model.addAttribute("pillowcaseProfit", pricingService.getPillowcaseUnitProfit());
     }
 
     private void addCurfoxContext(Model model) {
@@ -254,6 +256,8 @@ public class OrderPageController {
         request.setBeddingDesign(item.getBeddingDesign());
         request.setQuantity(item.getQuantity());
         request.setPillowcaseQuantity(item.getPillowcaseQuantity());
+        request.setUnitSellingPrice(item.getUnitSellingPrice());
+        request.setUnitProfit(item.getUnitProfit());
         return request;
     }
 }

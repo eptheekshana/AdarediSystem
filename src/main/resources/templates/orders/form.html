@@ -163,7 +163,9 @@
                                     <label>Quantity
                                         <input type="number" min="1" th:field="*{items[__${stat.index}__].quantity}" class="qty-input" required>
                                     </label>
-                                    <label>Extra Pillowcases (Rs. 220 sell, Rs. 125 profit)
+                                    <input type="hidden" th:field="*{items[__${stat.index}__].unitSellingPrice}">
+                                    <input type="hidden" th:field="*{items[__${stat.index}__].unitProfit}">
+                                    <label>Extra Pillowcases (<span th:text="'Rs. ' + ${#numbers.formatDecimal(pillowcasePrice, 0, 'COMMA', 0, 'POINT')} + ' sell, Rs. ' + ${#numbers.formatDecimal(pillowcaseProfit, 0, 'COMMA', 0, 'POINT')} + ' profit'">Rs. 220 sell, Rs. 125 profit</span>)
                                         <input type="number" min="0" th:field="*{items[__${stat.index}__].pillowcaseQuantity}" class="pillowcase-input">
                                     </label>
                                     <label class="full">Bedding Design *
@@ -233,9 +235,14 @@
 
                 <!-- Price List Accordion / Reference -->
                 <div style="margin-top: 2rem; padding-top: 1.25rem; border-top: 1px solid var(--border);">
-                    <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">
-                        Fixed Price Guide (LKR)
-                    </h4>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                        <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">
+                            Active Price Guide (LKR)
+                        </h4>
+                        <a th:href="@{/pricing}" style="font-size: 0.78rem; font-weight: 700; color: var(--primary); text-decoration: none; display: inline-flex; align-items: center; gap: 0.2rem;">
+                            Change Profits ↗
+                        </a>
+                    </div>
                     <div style="max-height: 240px; overflow-y: auto; padding-right: 0.35rem; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.82rem;">
                         <div th:each="row : ${priceRows}" style="display: flex; justify-content: space-between; padding: 0.35rem 0.5rem; background: var(--surface-glass-alt); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
                             <span th:text="${row.type + ' ' + row.sizeLabel}" style="font-weight: 600;"></span>
@@ -254,6 +261,8 @@
 <script th:inline="javascript">
     window.SELLING = [(${sellingPricesJson})];
     window.PROFITS = [(${unitProfitsJson})];
+    window.PILLOWCASE_PRICE = [(${pillowcasePrice})];
+    window.PILLOWCASE_PROFIT = [(${pillowcaseProfit})];
 </script>
 <script th:src="@{/js/theme.js}"></script>
 <script th:src="@{/js/order-form.js}"></script>

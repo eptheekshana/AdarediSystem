@@ -38,3 +38,14 @@ CREATE TABLE IF NOT EXISTS order_items (
 );
 
 CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at);
+
+CREATE TABLE IF NOT EXISTS pricing_rules (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  item_key VARCHAR(50) NOT NULL UNIQUE,
+  bedsheet_type VARCHAR(20),
+  bed_size VARCHAR(20),
+  item_label VARCHAR(100) NOT NULL,
+  selling_price DECIMAL(12,2) NOT NULL,
+  unit_profit DECIMAL(12,2) NOT NULL,
+  updated_at TIMESTAMP
+);

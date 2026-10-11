@@ -16,8 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class OrderService {
 
-    private static final BigDecimal PILLOWCASE_UNIT_PRICE = BigDecimal.valueOf(220);
-    private static final BigDecimal PILLOWCASE_UNIT_PROFIT = BigDecimal.valueOf(125);
     private static final BigDecimal DELIVERY_CHARGE_FREE_LIMIT = BigDecimal.valueOf(400);
 
     private final OrderRepository orderRepository;
@@ -119,8 +117,12 @@ public class OrderService {
     }
 
     private OrderItem buildItem(OrderItemRequest request) {
-        BigDecimal unitSelling = pricingService.getSellingPrice(request.getBedsheetType(), request.getBedSize());
-        BigDecimal unitProfit = pricingService.getUnitProfit(request.getBedsheetType(), request.getBedSize());
+        BigDecimal unitSelling = request.getUnitSellingPrice() != null
+                ? request.getUnitSellingPrice()
+                : pricingService.getSellingPrice(request.getBedsheetType(), request.getBedSize());
+        BigDecimal unitProfit = request.getUnitProfit() != null
+                ? request.getUnitProfit()
+                : pricingService.getUnitProfit(request.getBedsheetType(), request.getBedSize());
         int quantity = Math.max(request.getQuantity(), 1);
 
         OrderItem item = new OrderItem();
@@ -134,8 +136,8 @@ public class OrderService {
         item.setUnitProfit(unitProfit);
         BigDecimal bedsheetSell = unitSelling.multiply(BigDecimal.valueOf(quantity));
         BigDecimal bedsheetProfit = unitProfit.multiply(BigDecimal.valueOf(quantity));
-        BigDecimal pillowcaseSell = PILLOWCASE_UNIT_PRICE.multiply(BigDecimal.valueOf(pillowcaseQuantity));
-        BigDecimal pillowcaseProfit = PILLOWCASE_UNIT_PROFIT.multiply(BigDecimal.valueOf(pillowcaseQuantity));
+        BigDecimal pillowcaseSell = pricingService.getPillowcaseSellingPrice().multiply(BigDecimal.valueOf(pillowcaseQuantity));
+        BigDecimal pillowcaseProfit = pricingService.getPillowcaseUnitProfit().multiply(BigDecimal.valueOf(pillowcaseQuantity));
         item.setLineSellingPrice(bedsheetSell.add(pillowcaseSell));
         item.setLineProfit(bedsheetProfit.add(pillowcaseProfit));
         return item;

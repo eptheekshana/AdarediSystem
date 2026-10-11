@@ -8,8 +8,8 @@
     const codInput = document.getElementById('codValueInput');
     if (!container || !addBtn) return;
 
-    const PILLOWCASE_PRICE = 220;
-    const PILLOWCASE_PROFIT = 125;
+    const PILLOWCASE_PRICE = Number(window.PILLOWCASE_PRICE != null ? window.PILLOWCASE_PRICE : 220);
+    const PILLOWCASE_PROFIT = Number(window.PILLOWCASE_PROFIT != null ? window.PILLOWCASE_PROFIT : 125);
 
     const bedsheetTypes = Object.keys(window.SELLING || {});
     const bedSizes = bedsheetTypes.length ? Object.keys(window.SELLING[bedsheetTypes[0]] || {}) : [];
@@ -32,8 +32,20 @@
             };
         }
         
-        const unitSell = Number(window.SELLING[type][size]);
-        const unitProfit = Number(window.PROFITS[type][size]);
+        let unitSell = Number(window.SELLING[type][size]);
+        let unitProfit = Number(window.PROFITS[type][size]);
+
+        const savedSellEl = row.querySelector('input[name$=".unitSellingPrice"]');
+        const savedProfitEl = row.querySelector('input[name$=".unitProfit"]');
+        if (savedSellEl && savedProfitEl && savedSellEl.value && savedProfitEl.value) {
+            const initialType = row.getAttribute('data-initial-type') || row.querySelector('.type-select')?.getAttribute('value');
+            const initialSize = row.getAttribute('data-initial-size') || row.querySelector('.size-select')?.getAttribute('value');
+            if ((!initialType || type === initialType) && (!initialSize || size === initialSize)) {
+                unitSell = Number(savedSellEl.value);
+                unitProfit = Number(savedProfitEl.value);
+            }
+        }
+
         return {
             sell: unitSell * qty + (pillowcaseQty * PILLOWCASE_PRICE),
             profit: unitProfit * qty + (pillowcaseQty * PILLOWCASE_PROFIT),
@@ -152,7 +164,7 @@
                 <label>Quantity
                     <input type="number" min="1" name="items[${index}].quantity" class="qty-input" value="1" required>
                 </label>
-                <label>Extra Pillowcases (Rs. 220 sell, Rs. 125 profit)
+                <label>Extra Pillowcases (Rs. ${PILLOWCASE_PRICE} sell, Rs. ${PILLOWCASE_PROFIT} profit)
                     <input type="number" min="0" name="items[${index}].pillowcaseQuantity" class="pillowcase-input" value="0">
                 </label>
                 <label class="full">Bedding Design *

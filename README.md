@@ -160,8 +160,15 @@ After an order is pushed to Royal Express, **delivery charge is fetched automati
 **List orders:** `GET /api/orders`  
 **Get by id:** `GET /api/orders/{id}`  
 **Get by waybill:** `GET /api/orders/waybill/{waybillNo}`  
-**Price matrix:** `GET /api/orders/pricing`
+**Price matrix & rules:** `GET /api/orders/pricing`  
+**Update profit/pricing rules:** `PUT /api/orders/pricing`  
+**Reset to factory defaults:** `POST /api/orders/pricing/reset`  
+
+### Profit & Pricing Management
+- **Web UI:** Navigate to **Profit Settings** (`/pricing`) from the sidebar to update base profit margins and selling prices at any time.
+- **Historical Orders Safety Guarantee:** Modifying profit rates only affects **new orders created after saving**. Existing order records and previous profit analytics remain completely frozen with their historical values.
 
 ## Project location
 
 `/home/eptheekshana/Projects/bedsheet-order-profit`
+
